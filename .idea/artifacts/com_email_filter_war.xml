@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="com.email.filter:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>com.email.filter</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="emailFIlter.war">
+      <element id="artifact" artifact-name="com.email.filter:war exploded" />
+    </root>
+  </artifact>
+</component>
