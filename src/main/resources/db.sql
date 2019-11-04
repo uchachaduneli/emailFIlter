@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               5.7.17-log - MySQL Community Server (GPL)
+-- Server version:               5.7.20-log - MySQL Community Server (GPL)
 -- Server OS:                    Win64
--- HeidiSQL Version:             10.2.0.5599
+-- HeidiSQL Version:             10.1.0.5464
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -51,6 +51,30 @@ INSERT INTO `email_folders` (`id`, `name`) VALUES
 	(1, 'Inbox'),
 	(2, 'Sent');
 /*!40000 ALTER TABLE `email_folders` ENABLE KEYS */;
+
+-- Dumping structure for table emailfilter.filter
+CREATE TABLE IF NOT EXISTS `filter` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `filter` text NOT NULL,
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table emailfilter.filter: ~0 rows (approximately)
+/*!40000 ALTER TABLE `filter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `filter` ENABLE KEYS */;
+
+-- Dumping structure for table emailfilter.filter_type
+CREATE TABLE IF NOT EXISTS `filter_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table emailfilter.filter_type: ~0 rows (approximately)
+/*!40000 ALTER TABLE `filter_type` DISABLE KEYS */;
+/*!40000 ALTER TABLE `filter_type` ENABLE KEYS */;
 
 -- Dumping structure for table emailfilter.users
 CREATE TABLE IF NOT EXISTS `users` (
