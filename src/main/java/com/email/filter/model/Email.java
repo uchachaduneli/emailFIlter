@@ -14,20 +14,18 @@ public class Email {
     private Timestamp sendDate;
     private Timestamp receiveDate;
     private String content;
-    private String attachments;
     private String uid;//meilis uniq ID
     private Timestamp insertDate;
     private EmailFolders folder;
 
     public Email(String from, String to, String subject, Timestamp sendDate,
-                 Timestamp receiveDate, String content, String attachments, String uid, Users user, EmailFolders folder) {
+                 Timestamp receiveDate, String content, String uid, Users user, EmailFolders folder) {
         this.from = from;
         this.to = to;
         this.subject = subject;
         this.sendDate = sendDate;
         this.receiveDate = receiveDate;
         this.content = content;
-        this.attachments = attachments;
         this.uid = uid;
         this.user = user;
         this.folder = folder;
@@ -115,16 +113,6 @@ public class Email {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    @Basic
-    @Column(name = "attachments")
-    public String getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(String attachments) {
-        this.attachments = attachments;
     }
 
     @Basic

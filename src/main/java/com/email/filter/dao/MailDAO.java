@@ -51,9 +51,6 @@ public class MailDAO extends AbstractDAO {
         if (srchRequest.getContent() != null) {
             q.append(" and e.content like '%").append(srchRequest.getContent()).append("%'");
         }
-        if (srchRequest.getUserId() != null && srchRequest.getUserId() > 0) {
-            q.append(" and e.user.id ='").append(srchRequest.getUserId()).append("'");
-        }
         if (srchRequest.getSendDate() != null && srchRequest.getSendDateTo() != null) {
             q.append(" and e.sendDate between '").append(new Timestamp(sdf.parse(srchRequest.getSendDate()).getTime()))
                     .append("' and '").append(new Timestamp(sdf.parse(srchRequest.getSendDateTo()).getTime())).append("'");

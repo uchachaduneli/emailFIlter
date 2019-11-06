@@ -10,11 +10,7 @@ import java.util.List;
 
 public class UsersDTO {
 
-    public static final int ADMINISTRATOR = 1;
-    public static final int COMUNICATION_MANAGER = 2;
-    public static final int PRODUCT_MANAGER = 3;
-    public static final int FINANCIAL_MANAGER = 4;
-    public static final int RESERVATION_MANAGER = 5;
+
     public static int DELETED = 1;
     public static int ACTIVE = 0;
     private Integer userId;
@@ -52,26 +48,6 @@ public class UsersDTO {
             list.add(UsersDTO.parse(record));
         }
         return list;
-    }
-
-    public static int getADMINISTRATOR() {
-        return ADMINISTRATOR;
-    }
-
-    public static int getComunicationManager() {
-        return COMUNICATION_MANAGER;
-    }
-
-    public static int getProductManager() {
-        return PRODUCT_MANAGER;
-    }
-
-    public static int getFinancialManager() {
-        return FINANCIAL_MANAGER;
-    }
-
-    public static int getReservationManager() {
-        return RESERVATION_MANAGER;
     }
 
     public static int getDELETED() {

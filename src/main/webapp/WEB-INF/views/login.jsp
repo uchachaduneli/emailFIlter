@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: ME
-  Date: 10/27/2017
-  Time: 10:49 AM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -33,12 +26,9 @@
 
         var app = angular.module("app", []);
         app.controller("loginCtrl", function ($scope, $http, $location) {
-            var absUrl = $location.absUrl();
-            $scope.uri = "";
-            if (absUrl.split("?")[1]) {
-                $scope.uri = absUrl.split("?")[1].split("=")[1];
-            }
+
             $scope.user = {};
+            $scope.request = {};
 
             $scope.login = function () {
                 function resFunc(res) {
@@ -50,13 +40,65 @@
                 $scope.req = {username: $scope.user.username, password: $scope.user.password};
                 ajaxCall($http, "login?username=" + $scope.user.username + "&password=" + $scope.user.password, null, resFunc);
             };
+
+            $scope.sendRestoreMail = function () {
+                function resFunc(res) {
+                    if (res.errorCode == 0) {
+                        successMsg('Password Sent, Check Email Please');
+                        closeModal('editModal');
+                    } else {
+                        errorMsg('Operation Failed');
+                    }
+                    $scope.request = {};
+                }
+
+                ajaxCall($http, "restore-pass?username=" + $scope.request.username, null, resFunc);
+            };
+
         });
 
     </script>
 
 </head>
 <body ng-app="app" class="hold-transition login-page">
+
+
 <div class="login-box" data-role="none" ng-controller="loginCtrl">
+
+    <div class="modal fade bs-example-modal-lg not-printable" id="editModal" role="dialog"
+         aria-labelledby="editModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="editModalLabel">Restore Password</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <form class="form-horizontal" name="ediFormName">
+                            <div class="form-group col-sm-10 ">
+                                <label class="control-label col-sm-3">Username</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="username" name="username"
+                                           ng-model="request.username">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-10"></div>
+                            <div class="form-group col-sm-12 text-center">
+                                <a class="btn btn-app" ng-click="sendRestoreMail()">
+                                    <i class="fa fa-send"></i> Restore
+                                </a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="login-logo">
         <a href=""><img class="col-xs-12" src="resources/imgs/logo.jpg"></a>
     </div>
@@ -80,6 +122,9 @@
                     <i class="fa fa-sign-in"></i> L o g i n
                 </a>
             </div>
+            <a data-toggle="modal" data-target="#editModal" class="btn btn-xs">
+                <i class="fa fa-key"></i>&nbsp;Forgot Password?
+            </a>
         </form>
     </div>
 </div>

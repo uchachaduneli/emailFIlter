@@ -27,19 +27,22 @@ CREATE TABLE IF NOT EXISTS `email`
     `send_date`    timestamp NULL     DEFAULT NULL,
     `receive_date` timestamp NULL     DEFAULT NULL,
     `content`      text,
-    `attachments`  text,
     `insert_date`  timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `uid`          varchar(50)        DEFAULT NULL,
     `folder_id`    int(11)   NOT NULL DEFAULT '1',
     PRIMARY KEY (`id`),
     KEY `Index 2` (`user_id`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 73
+  AUTO_INCREMENT = 74
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.email: ~0 rows (approximately)
+-- Dumping data for table emailfilter.email: ~1 rows (approximately)
 /*!40000 ALTER TABLE `email`
     DISABLE KEYS */;
+INSERT INTO `email` (`id`, `user_id`, `from`, `to`, `subject`, `send_date`, `receive_date`, `content`, `insert_date`,
+                     `uid`, `folder_id`)
+VALUES (73, 1, 'sadsa@gmail.com', 'me', 'babli bubli', '2019-11-06 01:53:54', '2019-11-07 01:53:56',
+        'this is content of email', '2019-11-07 01:54:03', NULL, 1);
 /*!40000 ALTER TABLE `email`
     ENABLE KEYS */;
 
@@ -66,16 +69,23 @@ VALUES (1, 'Inbox'),
 CREATE TABLE IF NOT EXISTS `filter`
 (
     `id`          int(11)   NOT NULL AUTO_INCREMENT,
-    `filter`      text      NOT NULL,
+    `desc`        text      NOT NULL,
     `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
+    `type_id`     int(11)   NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `FK_filter_filter_type` (`type_id`),
+    CONSTRAINT `FK_filter_filter_type` FOREIGN KEY (`type_id`) REFERENCES `filter_type` (`id`)
 ) ENGINE = InnoDB
+  AUTO_INCREMENT = 3
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.filter: ~0 rows (approximately)
+-- Dumping data for table emailfilter.filter: ~2 rows (approximately)
 /*!40000 ALTER TABLE `filter`
     DISABLE KEYS */;
+INSERT INTO `filter` (`id`, `desc`, `create_date`, `update_date`, `type_id`)
+VALUES (1, '1', '2019-11-07 01:51:46', '2019-11-07 01:51:47', 1),
+       (2, '62.13.25.123', '2019-11-07 01:52:04', '2019-11-07 01:52:05', 2);
 /*!40000 ALTER TABLE `filter`
     ENABLE KEYS */;
 
@@ -86,11 +96,15 @@ CREATE TABLE IF NOT EXISTS `filter_type`
     `name` varchar(50) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
+  AUTO_INCREMENT = 3
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.filter_type: ~0 rows (approximately)
+-- Dumping data for table emailfilter.filter_type: ~2 rows (approximately)
 /*!40000 ALTER TABLE `filter_type`
     DISABLE KEYS */;
+INSERT INTO `filter_type` (`id`, `name`)
+VALUES (1, 'By Content'),
+       (2, 'By Sender IP');
 /*!40000 ALTER TABLE `filter_type`
     ENABLE KEYS */;
 
@@ -117,8 +131,10 @@ CREATE TABLE IF NOT EXISTS `users`
 -- Dumping data for table emailfilter.users: ~2 rows (approximately)
 /*!40000 ALTER TABLE `users`
     DISABLE KEYS */;
-INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `type_id`, `deleted`, `email`, `email_password`, `create_date`)
-VALUES (1, 'უჩა ჩადუნელი', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', 1, 0, 'emailfilter19@gmail.com', '123!@#asdASD', '2019-11-03 00:58:32'),
+INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `type_id`, `deleted`, `email`,
+                     `email_password`, `create_date`)
+VALUES (1, 'უჩა ჩადუნელი', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', 1, 0, 'emailfilter19@gmail.com', '123!@#asdASD',
+        '2019-11-03 00:58:32'),
        (2, 'o', 'o', '10e21da237a4a1491e769df6f4c3b419', 1, 0, 'o', 'o', '2018-08-26 13:00:13');
 /*!40000 ALTER TABLE `users`
     ENABLE KEYS */;

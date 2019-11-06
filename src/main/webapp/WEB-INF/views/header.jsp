@@ -49,6 +49,8 @@
             }).addClass('active');
             if (url.pathname.indexOf("emails") > -1) {
                 $('#selected_item').text("Emails");
+            } else if (url.pathname.indexOf("filters") > -1) {
+                $('#selected_item').text("Filters");
             }
 
 
@@ -167,13 +169,19 @@
     <div class="row" class="main-sidebar">
         <aside class="main-sidebar">
             <section class="sidebar">
-                <img src="resources/imgs/logo.jpg" style="width: 80%; margin-top: 10%; margin-left: 14%"/>
+                <img src="resources/imgs/logo.jpg" style="width: 80%; margin-top: 10%; margin-left: 10%"/>
                 <hr/>
                 <ul class="sidebar-menu" data-widget="tree">
                     <li>
                         <a class="menuItem" href="emails">
                             <i class="fa fa-envelope"></i>
                             <span>Emails</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menuItem" href="filters">
+                            <i class="fa fa-filter"></i>
+                            <span>Filters</span>
                         </a>
                     </li>
                     <li>

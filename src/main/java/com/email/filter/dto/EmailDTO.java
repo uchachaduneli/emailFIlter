@@ -38,7 +38,6 @@ public class EmailDTO {
         dto.setSendDate(record.getSendDate());
         dto.setReceiveDate(record.getReceiveDate());
         dto.setContent(record.getContent());
-        dto.setAttachments(record.getAttachments());
         dto.setInsertDate(record.getInsertDate());
         return dto;
     }

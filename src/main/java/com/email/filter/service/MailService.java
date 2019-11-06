@@ -15,14 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
-import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -49,34 +47,7 @@ public class MailService {
     private UsersService userService;
 
     public static void main(String[] args) throws Exception {
-//        sendNotifUsingGmail(1);
-//        String mailFrom = new String("miminotest@gmail.com");
-//        String mailTo = new String("miminotest@gmail.com");
 
-        String senderPassword = new String("1qaz@WSX1qaz");
-        String senderUserName = new String("miminotest@yandex.ru");
-
-//        String senderPassword = new String("Testirebah1");
-//        String senderUserName = new String("administrator@hotelhub.ge");
-
-//        MailService newGmailClient = new MailService();
-
-//        newGmailClient.sendGmail(mailFrom, mailTo, mailSubject, mailText);
-
-//        newGmailClient.readGmail();
-//        newGmailClient.downloadEmailAttachments(senderUserName, senderPassword);
-// ************************************************************
-
-//        List<String> addresats = new ArrayList<>();
-////        addresats.add("uchachaduneli@gmail.com");
-//        addresats.add("david.kaliashvili@gmail.com");
-//
-//        List<String> attachments = new ArrayList<>();
-//        attachments.add("C:\\Users\\ME\\IdeaProjects\\miminoTravel\\src\\main\\resources\\0012.pdf");
-//
-//        newGmailClient.sendEmail(senderUserName, senderPassword,
-//                addresats,
-//                null, attachments, "TEST MAIL SUBJECT", "ეს არის სატესტო მეილის ტექსტი");
     }
 
     public List<EmailDTO> getEmails(int start, int limit, MailRequest srchRequest) throws ParseException {
@@ -96,7 +67,6 @@ public class MailService {
         obj.setTo(request.getTo());
         obj.setSubject(request.getSubject());
         obj.setContent(request.getContent());
-        obj.setAttachments(request.getAttachments());
         obj.setSendDate(new Timestamp(sdf.parse(request.getSendDate()).getTime()));
         obj.setReceiveDate(new Timestamp(sdf.parse(request.getReceiveDate()).getTime()));
         obj.setUser((Users) mailDAO.find(Users.class, request.getUserId()));
@@ -111,8 +81,7 @@ public class MailService {
         return obj;
     }
 
-    private String getTextFromMimeMultipart(
-            MimeMultipart mimeMultipart) throws MessagingException, IOException {
+    private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws MessagingException, IOException {
         String result = "";
         int count = mimeMultipart.getCount();
         for (int i = 0; i < count; i++) {
@@ -130,21 +99,11 @@ public class MailService {
         return result;
     }
 
-    private MimeBodyPart createFileAttachment(String filepath)
-            throws MessagingException {
-        MimeBodyPart mbp = new MimeBodyPart();
-
-        FileDataSource fds = new FileDataSource(filepath);
-        mbp.setDataHandler(new DataHandler(fds));
-        mbp.setFileName(fds.getName());
-        return mbp;
-    }
-
-    public void downloadEmailWithAttachments(Integer userId, String userName, String password) {
+    public void loadEmails(Integer userId, String userName, String password, Integer folderId) {
         try {
 
             Users user = (Users) mailDAO.find(Users.class, userId);
-            EmailFolders emailFolder = (EmailFolders) mailDAO.find(EmailFolders.class, 1);//inbox -ია 1 აიდიზე
+            EmailFolders emailFolder = (EmailFolders) mailDAO.find(EmailFolders.class, folderId);//second param 1 related to INBOX / 2 to spam
 
             Properties props2 = System.getProperties();
             props2.setProperty("mail.store.protocol", "imaps");
@@ -152,27 +111,14 @@ public class MailService {
             props2.put("mail.store.protocol", "imaps");
             props2.put("mail.imap.ssl.enable", "true");
             props2.put("mail.imap.port", "993");
-
             Session session2 = Session.getDefaultInstance(props2, null);
-
-
             Store store = session2.getStore("imaps");
-
             store.connect("imap.yandex.ru", userName, password);
-
-//        Folder[] f = store.getDefaultFolder().list();
-//        for(Folder fd:f)
-//            System.out.println(">> "+fd.getName()); System.exit(0);
-
             Folder folder = store.getFolder("INBOX");//get inbox
             UIDFolder uf = (UIDFolder) folder;
-
             folder.open(Folder.READ_ONLY);//open folder only to read
-
             Message inboxMails[] = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-
             List<Email> emails = new ArrayList<>();
-
             for (int i = 0; i < inboxMails.length; i++) {
                 Message message = inboxMails[i];
                 Address[] fromAddress = message.getFrom();
@@ -180,62 +126,27 @@ public class MailService {
                 String subject = message.getSubject();
                 Date sentDate = message.getSentDate();
                 Date receiveDate = message.getReceivedDate();
-
                 String contentType = message.getContentType();
                 String messageContent = "";
 
-                // store attachment file name, separated by comma
-                String attachFiles = "";
-
-                if (contentType.contains("multipart")) {
-                    // content may contain attachments
-                    Multipart multiPart = (Multipart) message.getContent();
-                    int numberOfParts = multiPart.getCount();
-                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
-                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                            // this part is attachment
-                            String fileName = part.getFileName();
-                            attachFiles += fileName + " ";
-                            part.saveFile("C:\\Users\\ME\\Desktop\\attachments" + File.separator + uf.getUID(message) + "_" + fileName);
-//                            part.saveFile("C:\\Users\\home\\Desktop\\attachments" + File.separator + uf.getUID(message) + "_" + fileName);
-//                            part.saveFile("/usr/binaries/tomcat9/webapps/ROOT/attachments" + File.separator + uf.getUID(message) + "_" + fileName);
-                        } else {
-                            // this part may be the message content
-                            if (inboxMails[i].isMimeType("text/plain")) {
-                                messageContent = inboxMails[i].getContent().toString();
-                            } else if (inboxMails[i].isMimeType("multipart/*")) {
-                                MimeMultipart mimeMultipart = (MimeMultipart) inboxMails[i].getContent();
-                                messageContent = getTextFromMimeMultipart(mimeMultipart);
-                            }
-//                            messageContent = part.getContent().toString();
-                        }
-                    }
-
-                    if (attachFiles.length() > 1) {
-                        attachFiles = attachFiles.substring(0, attachFiles.length() - 2);
-                    }
-                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
-                    Object content = message.getContent();
-                    if (content != null) {
-                        messageContent = content.toString();
-                    }
+                Object content = message.getContent();
+                if (content != null) {
+                    messageContent = content.toString();
                 }
 
                 mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
-                        new Timestamp(receiveDate.getTime()), messageContent, attachFiles, uf.getUID(message) + "", user, emailFolder));
-//                message.setFlag(Flags.Flag.SEEN, true);//თუ აქამდე მოვიდა და ბაზაშიც დასეივდა SEEN დაუსვას მეილზე
+                        new Timestamp(receiveDate.getTime()), messageContent, uf.getUID(message) + "", user, emailFolder));
+
+//                message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
+
 //				print out details of each message
                 System.out.println("Message ID" + uf.getUID(message) + ":");
                 System.out.println("\t From: " + from);
                 System.out.println("\t Subject: " + subject);
                 System.out.println("\t Sent Date: " + sentDate);
                 System.out.println("\t Receive Date: " + receiveDate);
-                System.out.println("\t Message: " + messageContent);
-                System.out.println("\t Attachments: " + attachFiles);
+                System.out.println("\t Message: " + messageContent + " \n ***********   NEXT ONE    ********** \n");
             }
-
-            // disconnect
             folder.close(false);
             store.close();
         } catch (javax.mail.MessagingException ex) {
@@ -250,33 +161,45 @@ public class MailService {
         List<UsersDTO> users = userService.getUsers();
         for (UsersDTO user : users) {
             if (user.getEmail() != null && user.getEmailPassword() != null && user.getDeleted() != UsersDTO.DELETED) {
-                downloadEmailWithAttachments(user.getUserId(), user.getEmail(), user.getEmailPassword());
+                // loadEmails(user.getUserId(), user.getEmail(), user.getEmailPassword());
             }
         }
     }
 
-    private String[] getEmailsByStageGroupId(Integer stageId) {
-        logger.debug("Retrieving Users Emails For This Stage Types");
-        List<String> mails = new ArrayList<String>();
-        for (Users u : userDAO.getUsersByTypeId(stageId)) {
-            mails.add(u.getEmail());
-        }
-        logger.debug("Users Emails For This Stage Types Are Loaded");
-        return mails.stream().toArray(String[]::new);
-    }
+    public void sendNotifUsingGmail(String to, String emailSubject, String text) throws MessagingException {
+        logger.debug("Started Sending Mail");
+        try {
 
+            Properties emailProperties;
+            Session mailSession;
+            MimeMessage emailMessage;
+            emailProperties = System.getProperties();
+            emailProperties.put("mail.smtp.port", "587");
+            emailProperties.put("mail.smtp.auth", "true");
+            emailProperties.put("mail.smtp.starttls.enable", "true");
+            emailProperties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 
-    class EmailAuthenticator extends javax.mail.Authenticator {
-        private String login;
-        private String password;
+            mailSession = Session.getDefaultInstance(emailProperties, null);
+            emailMessage = new MimeMessage(mailSession);
 
-        public EmailAuthenticator(final String login, final String password) {
-            this.login = login;
-            this.password = password;
-        }
+            emailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 
-        public PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(login, password);
+            Multipart mmp = new MimeMultipart();
+            MimeBodyPart bodyPart = new MimeBodyPart();
+            bodyPart.setContent(text, "text/plain; charset=utf-8");
+            mmp.addBodyPart(bodyPart);
+
+            emailMessage.setSubject(emailSubject);
+            emailMessage.setContent(mmp);
+
+            Transport transport = mailSession.getTransport("smtp");
+
+            transport.connect("smtp.gmail.com", "emailfilter19@gmail.com", "123!@#asdASD");
+            transport.sendMessage(emailMessage, emailMessage.getAllRecipients());
+            transport.close();
+        } catch (MessagingException ex) {
+            logger.error("Error While Sending Password Restoration", ex);
+            throw ex;
         }
     }
 }

@@ -3,6 +3,7 @@ package com.email.filter.dao;
 
 import com.email.filter.dto.UsersDTO;
 import com.email.filter.model.Users;
+import com.email.filter.utils.MD5Provider;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -29,16 +30,15 @@ public class UserDAO extends AbstractDAO {
     public Users login(String username, String password) throws Exception {
         try {
 
-            StringBuilder q = new StringBuilder();
-            q.append("Select e From ").append(Users.class.getSimpleName())
-                    .append(" e Where e.userName ='").append(username).append("'")
-                    .append(" and e.userPassword ='").append(password).append("'");
+            String q = "Select e From " + Users.class.getSimpleName()
+                    + " e Where e.userName ='" + username + "'  and (e.userPassword = '" + MD5Provider.doubleMd5(password) + "' or " +
+                    " e.userPassword = '" + password + "')";
 
-            TypedQuery<Users> query = entityManager.createQuery(q.toString(), Users.class);
-            List<Users> res = query.getResultList();
-            if (res.get(0).getDeleted() == UsersDTO.DELETED)
+            TypedQuery<Users> query = entityManager.createQuery(q, Users.class);
+            Users usr = query.getSingleResult();
+            if (usr.getDeleted() == UsersDTO.DELETED)
                 throw new Exception("Your Account Is Disabled, Contact Administrator");
-            return res.get(0);
+            return usr;
         } catch (NoResultException | IndexOutOfBoundsException ex) {
             throw new Exception("User Not Found, Check Credentials");
         } catch (Exception e) {

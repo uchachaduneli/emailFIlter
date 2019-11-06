@@ -54,7 +54,7 @@ public class UserController {
         if (userId != null) {
             return Response.withSuccess(userService.changePassword(userId, pass, newpass));
         } else {
-            return Response.withError("პაროლის შესაცვლელად გაიარეთ ავტორიზაცია");
+            return Response.withError("Please Login To For Changing Password");
         }
     }
 

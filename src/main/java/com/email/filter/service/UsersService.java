@@ -34,9 +34,9 @@ public class UsersService {
     }
 
 
-    public Users getUserById(int id) {
+    public Users getUserByEmail(String userName) {
         List<ParamValuePair> paramValues = new ArrayList<>();
-        paramValues.add(new ParamValuePair("userId", id));
+        paramValues.add(new ParamValuePair("userName", userName));
         List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
         if (res.isEmpty()) {
             return null;
@@ -102,7 +102,7 @@ public class UsersService {
     }
 
     public UsersDTO login(String username, String password) throws Exception {
-        return UsersDTO.parse(userDAO.login(username, MD5Provider.doubleMd5(password)));
+        return UsersDTO.parse(userDAO.login(username, password));
     }
 
     public List<UsersTypeDTO> getUserTypes() {

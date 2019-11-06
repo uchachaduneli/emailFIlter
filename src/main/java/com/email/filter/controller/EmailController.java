@@ -1,6 +1,5 @@
 package com.email.filter.controller;
 
-import com.email.filter.dto.UsersDTO;
 import com.email.filter.misc.Response;
 import com.email.filter.request.MailRequest;
 import com.email.filter.service.MailService;
@@ -28,9 +27,6 @@ public class EmailController {
     @ResponseBody
     private Response getEmails(@RequestParam("start") int start, @RequestParam("limit") int limit,
                                @RequestBody MailRequest request, HttpServletRequest servletRequest) throws Exception {
-        if (((Integer) servletRequest.getSession().getAttribute("typeId")) == UsersDTO.COMUNICATION_MANAGER) {
-            request.setUserId((Integer) servletRequest.getSession().getAttribute("userId"));
-        }
         return Response.withSuccess(mailService.getEmails(start, limit, request));
     }
 

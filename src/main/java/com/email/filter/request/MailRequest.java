@@ -12,7 +12,6 @@ public class MailRequest {
     private String receiveDate;
     private String receiveDateTo;
     private String content;
-    private String attachments;
 
     public Integer getFolderId() {
         return folderId;
@@ -102,11 +101,4 @@ public class MailRequest {
         this.content = content;
     }
 
-    public String getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(String attachments) {
-        this.attachments = attachments;
-    }
 }

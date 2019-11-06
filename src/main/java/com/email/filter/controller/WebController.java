@@ -15,9 +15,9 @@ public class WebController {
         return "users";
     }
 
-    @RequestMapping("/requests")
-    public String requests() {
-        return "requests";
+    @RequestMapping("/filters")
+    public String filters() {
+        return "filters";
     }
 
     @RequestMapping("/login")
@@ -25,64 +25,9 @@ public class WebController {
         return "login";
     }
 
-    @RequestMapping("/contacts")
-    public String contacts() {
-        return "contacts";
-    }
-
     @RequestMapping("/emails")
     public String emails() {
         return "emails";
-    }
-
-    @RequestMapping("/hotels")
-    public String hotels() {
-        return "hotels";
-    }
-
-    @RequestMapping("/objects")
-    public String objects() {
-        return "objects";
-    }
-
-    @RequestMapping("/places")
-    public String places() {
-        return "places";
-    }
-
-    @RequestMapping("/transports")
-    public String transports() {
-        return "transports";
-    }
-
-    @RequestMapping("/nonstandarts")
-    public String nonstandarts() {
-        return "nonstandarts";
-    }
-
-    @RequestMapping("/product")
-    public String product() {
-        return "product";
-    }
-
-    @RequestMapping("/restaurants")
-    public String restaurants() {
-        return "restaurants";
-    }
-
-    @RequestMapping("/distances")
-    public String distances() {
-        return "distances";
-    }
-
-    @RequestMapping("/guides")
-    public String guides() {
-        return "guides";
-    }
-
-    @RequestMapping("/financial")
-    public String financial() {
-        return "financial";
     }
 
     @RequestMapping("/")

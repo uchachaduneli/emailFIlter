@@ -9,12 +9,12 @@ function ajaxCall(http, url, data, sucessCallback, errorCallback) {
         if (data.errorCode && data.errorCode >= 700) {
             console.log(data);
             if (data.data != null && data.data.rootCause != undefined && data.data.rootCause.message.includes("foreign key constraint fails")) {
-                errorMsg("ოპერაცია არ სრულდება!!!   ჩანაწერს გააჩნია ბმა");
+                errorMsg("Operation Failed!!! Record has related row");
             } else {
                 if (data.errorCode == 700) {
                     errorMsg(data.message);
                 } else {
-                    errorMsg("ოპერაცია არ სრულდება!!!");
+                    errorMsg("Operation Failed!!!");
                 }
             }
             // alert(data.errorCode + ": " + data.message);
@@ -28,7 +28,7 @@ function ajaxCall(http, url, data, sucessCallback, errorCallback) {
         if (errorCallback) {
             errorCallback(data);
         } else {
-            errorMsg("დაფისქსირდა შეცდომა!!!");
+            errorMsg("Operation Failed!!!");
             console.log(data);
         }
     });

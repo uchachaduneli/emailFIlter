@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: ME
-  Date: 10/23/2017
-  Time: 3:38 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@include file="header.jsp" %>
 <script>
@@ -35,7 +28,7 @@
 
     });
 
-    app.controller("angController", ['$scope', '$http', '$filter', '$window', 'Upload', '$timeout', function ($scope, $http, $filter, $window, Upload, $timeout) {
+    app.controller("angController", ['$scope', '$http', '$filter', '$window', '$timeout', function ($scope, $http, $filter, $window, $timeout) {
         $scope.start = 0;
         $scope.page = 1;
         $scope.limit = "10";

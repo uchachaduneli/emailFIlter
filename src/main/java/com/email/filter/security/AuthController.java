@@ -1,12 +1,16 @@
 package com.email.filter.security;
 
 import com.email.filter.dto.UsersDTO;
+import com.email.filter.misc.Response;
+import com.email.filter.model.Users;
+import com.email.filter.service.MailService;
 import com.email.filter.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +25,23 @@ public class AuthController {
 
     @Autowired
     private UsersService usersService;
+
+    @Autowired
+    private MailService mailService;
+
+    @RequestMapping("/restore-pass")
+    @ResponseBody
+    public Response restorePassword(@RequestParam String username) throws Exception {
+        try {
+            Users usr = usersService.getUserByEmail(username);
+            if (usr == null) return Response.withError("UserName Not Found");
+            mailService.sendNotifUsingGmail(usr.getEmail(), "Password For emailFilter APP", "Your Password for EmailFIlter APP IS: " + usr.getUserPassword());
+            return Response.withSuccess("Check Email, Password Sent to " + usr.getEmail());
+        } catch (Exception e) {
+            return Response.withError("Operation Failed !!!");
+        }
+    }
+
 
     @RequestMapping(value = "/login", method = {RequestMethod.GET})
     public String login(HttpServletRequest request) {
