@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `users`
 /*!40000 ALTER TABLE `users`
     DISABLE KEYS */;
 INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `type_id`, `deleted`, `email`, `email_password`, `create_date`)
-VALUES (1, 'უჩა ჩადუნელი', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', 1, 0, 'myemailfilter2019', '123!@#asdASD', '2019-11-03 00:58:32'),
+VALUES (1, 'უჩა ჩადუნელი', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', 1, 0, 'emailfilter19@gmail.com', '123!@#asdASD', '2019-11-03 00:58:32'),
        (2, 'o', 'o', '10e21da237a4a1491e769df6f4c3b419', 1, 0, 'o', 'o', '2018-08-26 13:00:13');
 /*!40000 ALTER TABLE `users`
     ENABLE KEYS */;
