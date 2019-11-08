@@ -34,8 +34,6 @@
         $scope.limit = "10";
         $scope.request = {};
         $scope.srchCase = {};
-        $scope.fileNames = [];
-        $scope.attachmentNames = [];
 
         $scope.loadMainData = function () {
             $('#loadingModal').modal('show');
@@ -58,48 +56,8 @@
 
         $scope.loadMainData();
 
-        $scope.reply = function (obj) {
-            $scope.request.to = obj.from;
-            $scope.request.reply = obj.from;
-        }
-
-        $scope.sendMail = function () {
-            function resFunc(res) {
-                $('#loadingModal').modal('hide');
-                if (res.errorCode == 0) {
-                    successMsg('Operation Successfull');
-                    $scope.loadMainData();
-                    closeModal('editModal');
-                } else {
-                    errorMsg('Operation Failed');
-                }
-            }
-
-            $scope.req = {};
-
-            if ($scope.attachmentNames.length > 0) {
-                $scope.req.attachments = '';
-                angular.forEach($scope.attachmentNames, function (v) {
-                    if (v !== false) {
-                        $scope.req.attachments += v + ';';
-                    }
-                });
-            }
-
-            $scope.req.to = $scope.request.to;
-            $scope.req.cc = $scope.request.cc;
-            $scope.req.reply = $scope.request.reply;
-            $scope.req.subject = $scope.request.subject;
-            $scope.req.content = $scope.request.content;
-
-            console.log(angular.toJson($scope.req));
-            ajaxCall($http, "emails/send", angular.toJson($scope.req), resFunc);
-            $('#loadingModal').modal('show');
-        }
-
         $scope.init = function () {
             $scope.request = {};
-            $scope.attachmentNames = [];
         };
 
         function getUsers(res) {
@@ -156,112 +114,11 @@
             iframedoc.body.innerHTML = content;
         };
 
-        $scope.uploadFiles = function (files) {
-            $scope.files = files;
-            angular.forEach(files, function (file) {
-
-                $scope.attachmentNames.push(file.name);
-
-                if (file && !file.$error) {
-                    file.upload = Upload.upload({
-                        url: 'emails/add-attachment',
-                        file: file
-                    });
-
-                    file.upload.then(function (response) {
-                        $timeout(function () {
-                            file.result = response.data;
-                        });
-                    }, function (response) {
-                        if (response.status > 0)
-                            $scope.errorMsg = response.status + ': ' + response.data;
-                    });
-                }
-            });
-            console.log($scope.attachmentNames);
-        }
     }]);
 
 
 </script>
 
-<div class="modal fade bs-example-modal-lg not-printable" id="editModal" role="dialog" aria-labelledby="editModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="editModalLabel">Enter Information</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <form class="form-horizontal" name="ediFormName">
-                        <div class="form-group col-sm-10 ">
-                            <label class="control-label col-sm-3">To</label>
-                            <div class="col-sm-9">
-                                <input type="email" ng-model="request.to" class="form-control input-sm">
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-10 ">
-                            <label class="control-label col-sm-3">Cc</label>
-                            <div class="col-sm-9">
-                                <input type="text" ng-model="request.cc" id="ccInputId" class="form-control input-sm">
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-10 ">
-                            <label class="control-label col-sm-3">Subject</label>
-                            <div class="col-sm-9">
-                                <input type="text" ng-model="request.subject" class="form-control input-sm">
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-10 ">
-                            <label class="control-label col-sm-3">Message</label>
-                            <div class="col-sm-9">
-                <textarea cols="5" rows="5" type="text" ng-model="request.content" name="info" required
-                          class="form-control input-sm"> </textarea>
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-10 ">
-                            <label class="control-label col-sm-3">Attach file</label>
-                            <div class="col-sm-9">
-                                <div class="input-group input-file">
-                                    <input type="text" id="uploadDocNameInput" class="form-control"
-                                           onclick="$('#documentId').trigger('click');"
-                                           placeholder='Choose files...'/>
-                                    <span class="input-group-btn">
-                    <button class="btn btn-default btn-choose" id="documentId"
-                            type="file" ngf-select="uploadFiles($files)" ng-model="files" multiple
-                            accept="*/*" ngf-max-size="30MB">
-                      Browse</button>
-    		           </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-10 ">
-                            <label class="control-label col-sm-3">Attachments</label>
-                            <div class="col-sm-9">
-                                <ul style="min-height: 30px; border: 1px solid #d2d6de;">
-                                    <li ng-repeat="item in attachmentNames">
-                                        <a href="misc/get-file?name=attachments/{{item.name.split('.')[0]}}"
-                                           target="_blank">{{item}}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-10"></div>
-                        <div class="form-group col-sm-12 text-center">
-                            <a class="btn btn-app" ng-click="sendMail()">
-                                <i class="fa fa-send"></i> Send
-                            </a>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade bs-example-modal-lg" id="detailModal" tabindex="-1" role="dialog"
      aria-labelledby="editModalLabel" aria-hidden="true">
@@ -304,17 +161,6 @@
                             <td>{{slcted.receiveDate}}</td>
                         </tr>
                         <tr>
-                            <th class="text-right">Attachments</th>
-                            <td>{{slcted.attachments}}
-                                <ul>
-                                    <li ng-repeat="item in slcted.attachments.split(' ')"><a
-                                            href="misc/get-file?name=attachments/{{item.split('.')[0].trim()}}"
-                                            target="_blank">{{item}}</a>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-                        <tr>
                             <th class="text-right">CreateDate</th>
                             <td>{{slcted.insertDate}}</td>
                         </tr>
@@ -341,10 +187,10 @@
         <div class="box">
             <div class="box-header">
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-block btn-primary btn-md" ng-click="init()"
+                    <button type="button" class="btn btn-block btn-primary btn-md" ng-click="loadMainData()"
                             data-toggle="modal" data-target="#editModal">
-                        <i class="fa fa-envelope" aria-hidden="true"></i> &nbsp;
-                        Compose
+                        <i class="fa fa-refresh" aria-hidden="true"></i> &nbsp;
+                        Reload Synced Emails
                     </button>
                 </div>
                 <div class="col-md-2 col-xs-offset-8">
@@ -388,7 +234,7 @@
                                 <div class="form-group col-md-2">
                                     <select class="form-control" ng-model="srchCase.folderId"
                                             ng-change="loadMainData()">
-                                        <option value="" selected="selected">Type</option>
+                                        <option value="" selected="selected">Folder</option>
                                         <option ng-repeat="v in folders" ng-selected="v.id === srchCase.folderId"
                                                 value="{{v.id}}">{{v.name}}
                                         </option>
@@ -446,10 +292,10 @@
                         <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Folder</th>
                             <th>From</th>
                             <th>To</th>
                             <th>Subject</th>
-                            <th>Attachments</th>
                             <th>Crt. Date</th>
                             <th class="col-md-2 text-center">Action</th>
                         </tr>
@@ -458,10 +304,10 @@
                         <tr ng-repeat="r in list" ng-dblclick="handleDoubleClick(r.id)">
 
                             <td>{{r.id}}</td>
+                            <td>{{r.folder.name}}</td>
                             <td>{{r.from}}</td>
                             <td>{{r.to}}</td>
                             <td>{{r.subject}}</td>
-                            <td>{{r.attachments.length > 0 ? 'YES('+r.attachments.split(' ').length+')':'NO'}}</td>
                             <td>{{r.insertDate}}</td>
                             <td class="text-center">
                                 <a ng-click="showDetails(r.id)" data-toggle="modal" title="Details"

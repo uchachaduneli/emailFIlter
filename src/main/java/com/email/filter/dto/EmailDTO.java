@@ -23,10 +23,10 @@ public class EmailDTO {
     @JsonSerialize(using = JsonDateTimeSerializeSupport.class)
     private Date receiveDate;
     private String content;
-    private String attachments;
     @JsonSerialize(using = JsonDateTimeSerializeSupport.class)
     private Date insertDate;
-
+    private EmailFolderDTO folder;
+    private Integer folder_id;
 
     public static EmailDTO parse(Email record) {
         EmailDTO dto = new EmailDTO();
@@ -39,9 +39,12 @@ public class EmailDTO {
         dto.setReceiveDate(record.getReceiveDate());
         dto.setContent(record.getContent());
         dto.setInsertDate(record.getInsertDate());
+        if (record.getFolder() != null) {
+            dto.setFolder(EmailFolderDTO.parse(record.getFolder()));
+            dto.setFolder_id(record.getFolder().getId());
+        }
         return dto;
     }
-
 
     public static List<EmailDTO> parseToList(List<Email> records) {
         ArrayList<EmailDTO> list = new ArrayList<EmailDTO>();
@@ -49,30 +52,6 @@ public class EmailDTO {
             list.add(EmailDTO.parse(record));
         }
         return list;
-    }
-
-    public String getCc() {
-        return cc;
-    }
-
-    public void setCc(String cc) {
-        this.cc = cc;
-    }
-
-    public String getReply() {
-        return reply;
-    }
-
-    public void setReply(String reply) {
-        this.reply = reply;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public Integer getId() {
@@ -91,6 +70,14 @@ public class EmailDTO {
         this.user = user;
     }
 
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
     public String getFrom() {
         return from;
     }
@@ -99,12 +86,28 @@ public class EmailDTO {
         this.from = from;
     }
 
+    public String getReply() {
+        return reply;
+    }
+
+    public void setReply(String reply) {
+        this.reply = reply;
+    }
+
     public String getTo() {
         return to;
     }
 
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public String getCc() {
+        return cc;
+    }
+
+    public void setCc(String cc) {
+        this.cc = cc;
     }
 
     public String getSubject() {
@@ -139,19 +142,27 @@ public class EmailDTO {
         this.content = content;
     }
 
-    public String getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(String attachments) {
-        this.attachments = attachments;
-    }
-
     public Date getInsertDate() {
         return insertDate;
     }
 
     public void setInsertDate(Date insertDate) {
         this.insertDate = insertDate;
+    }
+
+    public EmailFolderDTO getFolder() {
+        return folder;
+    }
+
+    public void setFolder(EmailFolderDTO folder) {
+        this.folder = folder;
+    }
+
+    public Integer getFolder_id() {
+        return folder_id;
+    }
+
+    public void setFolder_id(Integer folder_id) {
+        this.folder_id = folder_id;
     }
 }
