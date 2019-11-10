@@ -19,7 +19,7 @@
                 <name>sync</name>
                 <job-name>Rules</job-name>
                 <job-group>RbaGroup</job-group>
-                <cron-expression>0/10 * * * * ?</cron-expression>
+                <cron-expression>0/30 * * * * ?</cron-expression>
             </cron>
         </trigger>
     </schedule>

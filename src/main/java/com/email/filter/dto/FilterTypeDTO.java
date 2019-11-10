@@ -10,6 +10,7 @@ public class FilterTypeDTO {
     private Integer id;
     private String name;
 
+    public static int IP_FILTER = 2;
 
     public static FilterTypeDTO parse(FilterType record) {
         FilterTypeDTO dto = new FilterTypeDTO();

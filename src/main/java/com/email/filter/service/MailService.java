@@ -1,19 +1,18 @@
 package com.email.filter.service;
 
 
+import com.email.filter.dao.FilterDAO;
 import com.email.filter.dao.MailDAO;
 import com.email.filter.dao.UserDAO;
-import com.email.filter.dto.EmailDTO;
-import com.email.filter.dto.EmailFolderDTO;
-import com.email.filter.dto.UsersDTO;
+import com.email.filter.dto.*;
 import com.email.filter.model.Email;
 import com.email.filter.model.EmailFolders;
+import com.email.filter.model.Filter;
 import com.email.filter.model.Users;
 import com.email.filter.request.MailRequest;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -22,11 +21,11 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author
@@ -42,25 +41,23 @@ public class MailService {
     private UserDAO userDAO;
 
     @Autowired
-    private UsersService userService;
+    private FilterDAO filterDAO;
 
     public static void main(String[] args) throws Exception {
         MailService ms = new MailService();
-        Users u = new Users();
-        u.setEmail("emailfilter19@gmail.com");
-        u.setEmailPassword("123!@#asdASD");
+        ms.loadEmails();
+//        ms.read();
+    }
 
-        EmailFolders f = new EmailFolders();
-        f.setName("INBOX");
-
-        ms.loadEmails(u, f);
+    public List<FilterDTO> getFilters() {
+        return FilterDTO.parseToList(filterDAO.getAll(Filter.class));
     }
 
     public List<EmailDTO> getEmails(int start, int limit, MailRequest srchRequest) throws ParseException {
         return EmailDTO.parseToList(mailDAO.getEMails(start, limit, srchRequest));
     }
 
-    public List<EmailFolderDTO> getEmailFolders() throws ParseException {
+    public List<EmailFolderDTO> getEmailFolders() {
         return EmailFolderDTO.parseToList(mailDAO.getAll(EmailFolders.class));
     }
 
@@ -82,29 +79,27 @@ public class MailService {
         return result;
     }
 
-    public void loadEmails(Users user, EmailFolders emailFolder) {
-        try {
-
+    public void loadEmails() throws Exception {
+        logger.debug("Syncronizer method started" + getActiveUsersList().size());
+        List<FilterDTO> filters = getFilters();
+        for (UsersDTO user : getActiveUsersList()) {
             Properties props2 = System.getProperties();
-            props2.put("mail.pop3.host", "pop.gmail.com");
-            props2.put("mail.pop3.port", "995");
-            props2.put("mail.pop3.starttls.enable", "true");
-            Session emailSession = Session.getDefaultInstance(props2);
+            props2.put("mail.smtp.host", "smtp.gmail.com");
+            props2.put("mail.smtp.socketFactory.port", "465");
+            props2.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            props2.put("mail.smtp.port", "465");
+            props2.put("mail.smtp.auth", "true");
+            Session emailSession = Session.getDefaultInstance(props2, null);
+            Store store = emailSession.getStore("imaps");
+            store.connect("smtp.gmail.com", user.getEmail(), user.getEmailPassword());
 
-            Store store = emailSession.getStore("pop3s");
-            Session session2 = Session.getInstance(props2, new javax.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(user.getEmail(), user.getEmailPassword());
-                }
-            });
-
-            store.connect("pop.gmail.com", user.getEmail(), user.getEmailPassword());
-
-            Folder folder = store.getFolder("INBOX");//get inbox
-            folder.open(Folder.READ_ONLY);//open folder only to read
-            Message inboxMails[] = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+            Folder inboxFolder = store.getFolder("INBOX");//get inbox
+            Folder spamFolder = store.getFolder("MySpam");
+            inboxFolder.open(Folder.READ_WRITE);//open folder only to read
+            Message inboxMails[] = inboxFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
             List<Email> emails = new ArrayList<>();
             for (int i = 0; i < inboxMails.length; i++) {
+                boolean moveToMySpam = false;
                 Message message = inboxMails[i];
                 Address[] fromAddress = message.getFrom();
                 String from = ((InternetAddress) fromAddress[0]).getAddress();
@@ -113,50 +108,70 @@ public class MailService {
                 Date receiveDate = message.getReceivedDate();
                 String contentType = message.getContentType();
                 String messageContent = "";
-
-                Object content = message.getContent();
-                if (content != null) {
-                    messageContent = content.toString();
+                if (message.getContent() != null) {
+                    messageContent = message.getContent().toString();
+                } else {
+                    messageContent = (message.getContent() instanceof MimeMultipart ?
+                            getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent);
                 }
+                for (FilterDTO filter : filters) {
+                    if (filter.getType().getId() == FilterTypeDTO.IP_FILTER) {// filtering by sender ip
+                        Enumeration headers = message.getAllHeaders();
+                        while (headers.hasMoreElements()) {
+                            Header h = (Header) headers.nextElement();
+                            if (h.getName().equals("Received") && h.getValue().contains("from")) {
+                                Pattern p = Pattern.compile("\\[(.*?)\\]");
+                                Matcher m = p.matcher(h.getValue());
+                                while (m.find()) {
+                                    if (m.group(1).trim().equals(filter.getDesc().trim())) { // Sender IP equals filter value
+                                        moveToMySpam = true;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (messageContent.contains(filter.getDesc())) {
+                            moveToMySpam = true;
+                        }
+                    }
 
-                // mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
-                //       new Timestamp(receiveDate.getTime()), messageContent, "", user, emailFolder));
+                    // mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
+                    //       new Timestamp(receiveDate.getTime()), messageContent, "", user, emailFolder));
 
-                message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
-//				print out details of each message
+                    message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
+                }
+                if (moveToMySpam) {
+                    //                moving messages to proper folder
+                    List<Message> tempList = new ArrayList<>();
+                    tempList.add(message);
+                    Message[] tempMessageArray = tempList.toArray(new Message[tempList.size()]);
+                    inboxFolder.copyMessages(tempMessageArray, spamFolder);
 
-                System.out.println("\t From: " + from);
-                System.out.println("\t Subject: " + subject);
-                System.out.println("\t Sent Date: " + sentDate);
-                System.out.println("\t Receive Date: " + receiveDate);
-                System.out.println("\t Message: " +
-                        (message.getContent() instanceof MimeMultipart ?
-                                getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent)
-                        + " \n ***********   NEXT ONE    ********** \n");
-
-//                moving messages to proper folder
-//                List<Message> tempList = new ArrayList<>();
-//                tempList.add(myImapMsg);
-//                Message[] tempMessageArray = tempList.toArray(new Message[tempList.size()]);
-//                fromFolder.copyMessages(tempMessageArray, destFolder);
+                    //				print out details of each message
+                    System.out.println("\t From: " + from);
+                    System.out.println("\t Subject: " + subject);
+                    System.out.println("\t Sent Date: " + sentDate);
+                    System.out.println("\t Receive Date: " + receiveDate);
+                    System.out.println("\t Message: " +
+                            (message.getContent() instanceof MimeMultipart ?
+                                    getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent)
+                            + " \n ***********   NEXT ONE    ********** \n");
+                }
             }
-            folder.close(true);
+            inboxFolder.close(true);
             store.close();
-        } catch (javax.mail.MessagingException ex) {
-            ex.printStackTrace();
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
-    @Transactional(rollbackFor = Throwable.class)
-    public void processUnreadEmails() {
-        List<UsersDTO> users = userService.getUsers();
-        for (UsersDTO user : users) {
+    private List<UsersDTO> getActiveUsersList() {
+        List<UsersDTO> users = new ArrayList<>();
+        List<UsersDTO> tmp = UsersDTO.parseToList(userDAO.getAll(Users.class));
+        for (UsersDTO user : tmp) {
             if (user.getEmail() != null && user.getEmailPassword() != null && user.getDeleted() != UsersDTO.DELETED) {
-                // loadEmails(user.getUserId(), user.getEmail(), user.getEmailPassword());
+                users.add(user);
             }
         }
+        return users;
     }
 
     public void sendNotifUsingGmail(String to, String emailSubject, String text) throws MessagingException {
@@ -193,6 +208,85 @@ public class MailService {
         } catch (MessagingException ex) {
             logger.error("Error While Sending Password Restoration", ex);
             throw ex;
+        }
+    }
+
+    public void read() {
+
+        Properties props = new Properties();
+
+        try {
+//            props.load(new FileInputStream(new File("smtp.properties")));
+            ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+            InputStream is = classloader.getResourceAsStream("smtp.properties");
+            props.load(is);
+            Session session = Session.getDefaultInstance(props, null);
+
+            Store store = session.getStore("imaps");
+            store.connect("smtp.gmail.com", "emailfilter19@gmail.com", "123!@#asdASD");
+
+            Folder inboxFolder = store.getFolder("inbox");
+            Folder spamFolder = store.getFolder("MySpam");
+            UIDFolder uf = (UIDFolder) inboxFolder;
+
+            inboxFolder.open(Folder.READ_WRITE);//open folder only to read
+            Message inboxMails[] = inboxFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+            List<Email> emails = new ArrayList<>();
+            for (int i = 0; i < inboxMails.length; i++) {
+                Message message = inboxMails[i];
+                Address[] fromAddress = message.getFrom();
+                String from = ((InternetAddress) fromAddress[0]).getAddress();
+                String subject = message.getSubject();
+                Date sentDate = message.getSentDate();
+                Date receiveDate = message.getReceivedDate();
+                String contentType = message.getContentType();
+
+                Enumeration headers = message.getAllHeaders();
+                while (headers.hasMoreElements()) {
+                    Header h = (Header) headers.nextElement();
+                    if (h.getName().equals("Received") && h.getValue().contains("from")) {
+                        Pattern p = Pattern.compile("\\[(.*?)\\]");
+                        Matcher m = p.matcher(h.getValue());
+                        while (m.find()) {
+                            System.out.println(m.group(1));
+                        }
+                    }
+                }
+
+                String messageContent = "";
+
+                Object content = message.getContent();
+                if (content != null) {
+                    messageContent = content.toString();
+                }
+
+                // mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
+                //       new Timestamp(receiveDate.getTime()), messageContent, "", user, emailFolder));
+
+//                message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
+//				print out details of each message
+
+                System.out.println("\t From: " + from);
+                System.out.println("\t Subject: " + subject);
+                System.out.println("\t Sent Date: " + sentDate);
+                System.out.println("\t Receive Date: " + receiveDate);
+                System.out.println("\t Message: " +
+                        (message.getContent() instanceof MimeMultipart ?
+                                getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent)
+                        + " \n ***********   NEXT ONE    ********** \n");
+
+//                moving messages to proper folder
+                List<Message> tempList = new ArrayList<>();
+                tempList.add(message);
+                Message[] tempMessageArray = tempList.toArray(new Message[tempList.size()]);
+                inboxFolder.copyMessages(tempMessageArray, spamFolder);
+            }
+
+            inboxFolder.close(true);
+            store.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

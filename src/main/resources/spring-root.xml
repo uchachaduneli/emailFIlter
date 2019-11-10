@@ -53,6 +53,12 @@
     <bean id="persistenceExceptionTranslationPostProcessor"
           class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
+    <!--    <bean id="scheduler"-->
+    <!--          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+    <!--        <property name="applicationContextSchedulerContextKey" value="applicationContext" />-->
+    <!--        &lt;!&ndash; additional properties here &ndash;&gt;-->
+    <!--    </bean>-->
+
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
