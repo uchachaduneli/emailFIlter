@@ -22,9 +22,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,7 +45,15 @@ public class MailService {
     private UsersService userService;
 
     public static void main(String[] args) throws Exception {
+        MailService ms = new MailService();
+        Users u = new Users();
+        u.setEmail("emailfilter19@gmail.com");
+        u.setEmailPassword("123!@#asdASD");
 
+        EmailFolders f = new EmailFolders();
+        f.setName("INBOX");
+
+        ms.loadEmails(u, f);
     }
 
     public List<EmailDTO> getEmails(int start, int limit, MailRequest srchRequest) throws ParseException {
@@ -56,29 +62,6 @@ public class MailService {
 
     public List<EmailFolderDTO> getEmailFolders() throws ParseException {
         return EmailFolderDTO.parseToList(mailDAO.getAll(EmailFolders.class));
-    }
-
-    @Transactional(rollbackFor = Throwable.class)
-    public Email save(MailRequest request) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        Email obj = new Email();
-        obj.setFrom(request.getFrom());
-        obj.setTo(request.getTo());
-        obj.setSubject(request.getSubject());
-        obj.setContent(request.getContent());
-        obj.setSendDate(new Timestamp(sdf.parse(request.getSendDate()).getTime()));
-        obj.setReceiveDate(new Timestamp(sdf.parse(request.getReceiveDate()).getTime()));
-        obj.setUser((Users) mailDAO.find(Users.class, request.getUserId()));
-//
-        if (request.getId() != null) {
-            obj.setId(request.getId());
-            obj = (Email) mailDAO.update(obj);
-        } else {
-            obj = (Email) mailDAO.create(obj);
-        }
-
-        return obj;
     }
 
     private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws MessagingException, IOException {
@@ -99,23 +82,25 @@ public class MailService {
         return result;
     }
 
-    public void loadEmails(Integer userId, String userName, String password, Integer folderId) {
+    public void loadEmails(Users user, EmailFolders emailFolder) {
         try {
 
-            Users user = (Users) mailDAO.find(Users.class, userId);
-            EmailFolders emailFolder = (EmailFolders) mailDAO.find(EmailFolders.class, folderId);//second param 1 related to INBOX / 2 to spam
-
             Properties props2 = System.getProperties();
-            props2.setProperty("mail.store.protocol", "imaps");
-            props2.put("mail.debug", "false");
-            props2.put("mail.store.protocol", "imaps");
-            props2.put("mail.imap.ssl.enable", "true");
-            props2.put("mail.imap.port", "993");
-            Session session2 = Session.getDefaultInstance(props2, null);
-            Store store = session2.getStore("imaps");
-            store.connect("imap.yandex.ru", userName, password);
+            props2.put("mail.pop3.host", "pop.gmail.com");
+            props2.put("mail.pop3.port", "995");
+            props2.put("mail.pop3.starttls.enable", "true");
+            Session emailSession = Session.getDefaultInstance(props2);
+
+            Store store = emailSession.getStore("pop3s");
+            Session session2 = Session.getInstance(props2, new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(user.getEmail(), user.getEmailPassword());
+                }
+            });
+
+            store.connect("pop.gmail.com", user.getEmail(), user.getEmailPassword());
+
             Folder folder = store.getFolder("INBOX");//get inbox
-            UIDFolder uf = (UIDFolder) folder;
             folder.open(Folder.READ_ONLY);//open folder only to read
             Message inboxMails[] = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
             List<Email> emails = new ArrayList<>();
@@ -134,20 +119,28 @@ public class MailService {
                     messageContent = content.toString();
                 }
 
-                mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
-                        new Timestamp(receiveDate.getTime()), messageContent, uf.getUID(message) + "", user, emailFolder));
+                // mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
+                //       new Timestamp(receiveDate.getTime()), messageContent, "", user, emailFolder));
 
-//                message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
-
+                message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
 //				print out details of each message
-                System.out.println("Message ID" + uf.getUID(message) + ":");
+
                 System.out.println("\t From: " + from);
                 System.out.println("\t Subject: " + subject);
                 System.out.println("\t Sent Date: " + sentDate);
                 System.out.println("\t Receive Date: " + receiveDate);
-                System.out.println("\t Message: " + messageContent + " \n ***********   NEXT ONE    ********** \n");
+                System.out.println("\t Message: " +
+                        (message.getContent() instanceof MimeMultipart ?
+                                getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent)
+                        + " \n ***********   NEXT ONE    ********** \n");
+
+//                moving messages to proper folder
+//                List<Message> tempList = new ArrayList<>();
+//                tempList.add(myImapMsg);
+//                Message[] tempMessageArray = tempList.toArray(new Message[tempList.size()]);
+//                fromFolder.copyMessages(tempMessageArray, destFolder);
             }
-            folder.close(false);
+            folder.close(true);
             store.close();
         } catch (javax.mail.MessagingException ex) {
             ex.printStackTrace();

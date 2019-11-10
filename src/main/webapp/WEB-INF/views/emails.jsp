@@ -190,7 +190,7 @@
                     <button type="button" class="btn btn-block btn-primary btn-md" ng-click="loadMainData()"
                             data-toggle="modal" data-target="#editModal">
                         <i class="fa fa-refresh" aria-hidden="true"></i> &nbsp;
-                        Reload Synced Emails
+                        Reload Emails
                     </button>
                 </div>
                 <div class="col-md-2 col-xs-offset-8">
@@ -313,10 +313,6 @@
                                 <a ng-click="showDetails(r.id)" data-toggle="modal" title="Details"
                                    data-target="#detailModal" class="btn btn-xs">
                                     <i class="fa fa-sticky-note-o"></i>&nbsp; Details
-                                </a>&nbsp;&nbsp;
-                                <a ng-click="reply(r)" data-toggle="modal" title="Reply"
-                                   data-target="#editModal" class="btn btn-xs">
-                                    <i class="fa fa-reply-all"></i>&nbsp; Reply
                                 </a>&nbsp;&nbsp;
                             </td>
                         </tr>
