@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               5.7.20-log - MySQL Community Server (GPL)
+-- Server version:               5.7.17-log - MySQL Community Server (GPL)
 -- Server OS:                    Win64
--- HeidiSQL Version:             10.1.0.5464
+-- HeidiSQL Version:             10.2.0.5599
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT = @@CHARACTER_SET_CLIENT */;
@@ -24,25 +24,31 @@ CREATE TABLE IF NOT EXISTS `email`
     `from`         varchar(50)        DEFAULT NULL,
     `to`           varchar(50)        DEFAULT NULL,
     `subject`      text,
-    `send_date`    timestamp NULL     DEFAULT NULL,
-    `receive_date` timestamp NULL     DEFAULT NULL,
     `content`      text,
     `insert_date`  timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `uid`          varchar(50)        DEFAULT NULL,
     `folder_id`    int(11)   NOT NULL DEFAULT '1',
+    `sender_ip`    varchar(20)        DEFAULT NULL,
+    `send_date`    timestamp NULL     DEFAULT NULL,
+    `receive_date` timestamp NULL     DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `Index 2` (`user_id`) USING BTREE
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 74
+  AUTO_INCREMENT = 76
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.email: ~1 rows (approximately)
+-- Dumping data for table emailfilter.email: ~3 rows (approximately)
 /*!40000 ALTER TABLE `email`
     DISABLE KEYS */;
-INSERT INTO `email` (`id`, `user_id`, `from`, `to`, `subject`, `send_date`, `receive_date`, `content`, `insert_date`,
-                     `uid`, `folder_id`)
-VALUES (73, 1, 'sadsa@gmail.com', 'me', 'babli bubli', '2019-11-06 01:53:54', '2019-11-07 01:53:56',
-        'this is content of email', '2019-11-07 01:54:03', NULL, 1);
+INSERT INTO `email` (`id`, `user_id`, `from`, `to`, `subject`, `content`, `insert_date`, `uid`, `folder_id`,
+                     `sender_ip`, `send_date`, `receive_date`)
+VALUES (73, 1, 'sadsa@gmail.com', 'me', 'babli bubli', 'this is content of email', '2019-11-07 01:54:03', NULL, 1, '',
+        NULL, NULL),
+       (74, 1, 'uchachaduneli@gmail.com', 'emailfilter19@gmail.com', 'test2', '\nthis is test message\'s content\r\n',
+        '2019-11-11 21:33:59', '', 2, '', '2019-11-11 00:30:24', '2019-11-11 00:30:35'),
+       (75, 1, 'emailfilter19@gmail.com', 'emailfilter19@gmail.com', 'test 3',
+        '\nthis is test N3 message\'s content\r\n', '2019-11-11 21:36:13', '', 2, '', '2019-11-11 21:36:03',
+        '2019-11-11 21:36:03');
 /*!40000 ALTER TABLE `email`
     ENABLE KEYS */;
 
@@ -61,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `email_folders`
     DISABLE KEYS */;
 INSERT INTO `email_folders` (`id`, `name`)
 VALUES (1, 'Inbox'),
-       (2, 'Sent');
+       (2, 'My Spam');
 /*!40000 ALTER TABLE `email_folders`
     ENABLE KEYS */;
 
@@ -80,12 +86,11 @@ CREATE TABLE IF NOT EXISTS `filter`
   AUTO_INCREMENT = 3
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.filter: ~2 rows (approximately)
+-- Dumping data for table emailfilter.filter: ~1 rows (approximately)
 /*!40000 ALTER TABLE `filter`
     DISABLE KEYS */;
 INSERT INTO `filter` (`id`, `desc`, `create_date`, `update_date`, `type_id`)
-VALUES (1, '1', '2019-11-07 01:51:46', '2019-11-07 01:51:47', 1),
-       (2, '62.13.25.123', '2019-11-07 01:52:04', '2019-11-07 01:52:05', 2);
+VALUES (1, 'test', '2019-11-07 01:51:46', '2019-11-11 01:25:12', 1);
 /*!40000 ALTER TABLE `filter`
     ENABLE KEYS */;
 
@@ -128,14 +133,13 @@ CREATE TABLE IF NOT EXISTS `users`
   AUTO_INCREMENT = 27
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.users: ~2 rows (approximately)
+-- Dumping data for table emailfilter.users: ~1 rows (approximately)
 /*!40000 ALTER TABLE `users`
     DISABLE KEYS */;
 INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `type_id`, `deleted`, `email`,
                      `email_password`, `create_date`)
 VALUES (1, 'უჩა ჩადუნელი', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', 1, 0, 'emailfilter19@gmail.com', '123!@#asdASD',
-        '2019-11-03 00:58:32'),
-       (2, 'o', 'o', '10e21da237a4a1491e769df6f4c3b419', 1, 0, 'o', 'o', '2018-08-26 13:00:13');
+        '2019-11-03 00:58:32');
 /*!40000 ALTER TABLE `users`
     ENABLE KEYS */;
 
