@@ -171,7 +171,7 @@
                     <button type="button" class="btn btn-block btn-primary btn-md" ng-click="syncEmails()"
                             data-toggle="modal" data-target="#editModal">
                         <i class="fa fa-refresh" aria-hidden="true"></i> &nbsp;
-                        Reload Emails
+                        Sync Emails
                     </button>
                 </div>
                 <div class="col-md-2 col-xs-offset-8">
