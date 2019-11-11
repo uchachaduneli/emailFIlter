@@ -17,9 +17,10 @@ public class Email {
     private String uid;//meilis uniq ID
     private Timestamp insertDate;
     private EmailFolders folder;
+    private String senderIp;
 
     public Email(String from, String to, String subject, Timestamp sendDate,
-                 Timestamp receiveDate, String content, String uid, Users user, EmailFolders folder) {
+                 Timestamp receiveDate, String content, String uid, Users user, EmailFolders folder, String senderIp) {
         this.from = from;
         this.to = to;
         this.subject = subject;
@@ -29,6 +30,7 @@ public class Email {
         this.uid = uid;
         this.user = user;
         this.folder = folder;
+        this.senderIp = senderIp;
     }
 
     public Email() {
@@ -113,6 +115,16 @@ public class Email {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Basic
+    @Column(name = "sender_ip")
+    public String getSenderIp() {
+        return senderIp;
+    }
+
+    public void setSenderIp(String senderIp) {
+        this.senderIp = senderIp;
     }
 
     @Basic

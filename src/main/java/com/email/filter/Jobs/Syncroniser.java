@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.Date;
 
 public class Syncroniser implements Job {
+
     Logger logger = Logger.getLogger(Syncroniser.class);
 
     @Override

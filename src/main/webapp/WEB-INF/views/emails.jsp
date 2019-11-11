@@ -2,32 +2,6 @@
 <%@include file="header.jsp" %>
 <script>
 
-    $(document).ready(function () {
-
-        $('input[name="datetime"]').datetimepicker({
-            weekStart: 1,
-            todayBtn: 1,
-            autoclose: 1,
-            todayHighlight: 1,
-            startView: 2,
-            forceParse: 0,
-            showMeridian: 1,
-            use24hours: 1
-        }).on('changeDate', function (ev) {
-        });
-
-        $('#ccInputId').blur(function () {
-            $('#ccInputId').val($('#ccInputId').val() + ';');
-        });
-
-        $('#ccInputId').keypress(function (e) {
-            if (e.keyCode == 0 || e.keyCode == 32) {
-                $('#ccInputId').val($('#ccInputId').val() + ';');
-            }
-        });
-
-    });
-
     app.controller("angController", ['$scope', '$http', '$filter', '$window', '$timeout', function ($scope, $http, $filter, $window, $timeout) {
         $scope.start = 0;
         $scope.page = 1;
@@ -43,18 +17,21 @@
                 $('#loadingModal').modal('hide');
             }
 
-            if ($scope.srchCase != undefined) {
-                if ($scope.srchCase.nextActivity != undefined && $scope.srchCase.nextActivity.includes('/')) {
-                    $scope.srchCase.nextActivity = $scope.srchCase.nextActivity.split(/\//).reverse().join('-')
-                }
-                if ($scope.srchCase.nextActivityTo != undefined && $scope.srchCase.nextActivityTo.includes('/')) {
-                    $scope.srchCase.nextActivityTo = $scope.srchCase.nextActivityTo.split(/\//).reverse().join('-')
-                }
-            }
             ajaxCall($http, "emails/get-emails?start=" + $scope.start + "&limit=" + $scope.limit, angular.toJson($scope.srchCase), getMainData);
         }
 
         $scope.loadMainData();
+
+        $scope.syncEmails = function () {
+            $('#loadingModal').modal('show');
+
+            function sync(res) {
+                $scope.loadMainData();
+                $('#loadingModal').modal('hide');
+            }
+
+            ajaxCall($http, "emails/sync-emails", null, sync);
+        };
 
         $scope.init = function () {
             $scope.request = {};
@@ -141,6 +118,10 @@
                             <td>{{slcted.user.userDesc}}</td>
                         </tr>
                         <tr>
+                            <th class="text-right">Sender IP</th>
+                            <td>{{slcted.senderIp}}</td>
+                        </tr>
+                        <tr>
                             <th class="text-right">From</th>
                             <td>{{slcted.from}}</td>
                         </tr>
@@ -187,7 +168,7 @@
         <div class="box">
             <div class="box-header">
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-block btn-primary btn-md" ng-click="loadMainData()"
+                    <button type="button" class="btn btn-block btn-primary btn-md" ng-click="syncEmails()"
                             data-toggle="modal" data-target="#editModal">
                         <i class="fa fa-refresh" aria-hidden="true"></i> &nbsp;
                         Reload Emails

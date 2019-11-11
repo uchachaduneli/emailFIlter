@@ -14,9 +14,7 @@ public class EmailDTO {
     private UsersDTO user;
     private Integer userId;
     private String from;
-    private String reply;
     private String to;
-    private String cc;
     private String subject;
     @JsonSerialize(using = JsonDateTimeSerializeSupport.class)
     private Date sendDate;
@@ -27,6 +25,7 @@ public class EmailDTO {
     private Date insertDate;
     private EmailFolderDTO folder;
     private Integer folder_id;
+    private String senderIp;
 
     public static EmailDTO parse(Email record) {
         EmailDTO dto = new EmailDTO();
@@ -39,6 +38,7 @@ public class EmailDTO {
         dto.setReceiveDate(record.getReceiveDate());
         dto.setContent(record.getContent());
         dto.setInsertDate(record.getInsertDate());
+        dto.setSenderIp(record.getSenderIp());
         if (record.getFolder() != null) {
             dto.setFolder(EmailFolderDTO.parse(record.getFolder()));
             dto.setFolder_id(record.getFolder().getId());
@@ -86,28 +86,12 @@ public class EmailDTO {
         this.from = from;
     }
 
-    public String getReply() {
-        return reply;
-    }
-
-    public void setReply(String reply) {
-        this.reply = reply;
-    }
-
     public String getTo() {
         return to;
     }
 
     public void setTo(String to) {
         this.to = to;
-    }
-
-    public String getCc() {
-        return cc;
-    }
-
-    public void setCc(String cc) {
-        this.cc = cc;
     }
 
     public String getSubject() {
@@ -164,5 +148,13 @@ public class EmailDTO {
 
     public void setFolder_id(Integer folder_id) {
         this.folder_id = folder_id;
+    }
+
+    public String getSenderIp() {
+        return senderIp;
+    }
+
+    public void setSenderIp(String senderIp) {
+        this.senderIp = senderIp;
     }
 }

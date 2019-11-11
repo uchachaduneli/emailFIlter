@@ -30,6 +30,13 @@ public class EmailController {
         return Response.withSuccess(mailService.getEmails(start, limit, request));
     }
 
+    @RequestMapping("/sync-emails")
+    @ResponseBody
+    private Response syncEmails() throws Exception {
+        mailService.loadEmails();
+        return Response.ok();
+    }
+
     @RequestMapping("/get-email-folders")
     @ResponseBody
     private Response getEmailFolders() throws Exception {

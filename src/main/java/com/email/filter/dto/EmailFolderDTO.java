@@ -10,6 +10,8 @@ public class EmailFolderDTO {
     private Integer id;
     private String name;
 
+    public static int INBOX = 1;
+    public static int SPAM = 2;
 
     public static EmailFolderDTO parse(EmailFolders record) {
         EmailFolderDTO dto = new EmailFolderDTO();

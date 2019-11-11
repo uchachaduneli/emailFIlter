@@ -13,6 +13,7 @@ import com.email.filter.request.MailRequest;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -22,6 +23,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -79,10 +81,11 @@ public class MailService {
         return result;
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     public void loadEmails() throws Exception {
         logger.debug("Syncronizer method started" + getActiveUsersList().size());
         List<FilterDTO> filters = getFilters();
-        for (UsersDTO user : getActiveUsersList()) {
+        for (Users user : getActiveUsersList()) {
             Properties props2 = System.getProperties();
             props2.put("mail.smtp.host", "smtp.gmail.com");
             props2.put("mail.smtp.socketFactory.port", "465");
@@ -107,12 +110,12 @@ public class MailService {
                 Date sentDate = message.getSentDate();
                 Date receiveDate = message.getReceivedDate();
                 String contentType = message.getContentType();
+                String senderIp = "";
                 String messageContent = "";
-                if (message.getContent() != null) {
-                    messageContent = message.getContent().toString();
-                } else {
+                Object content = message.getContent();
+                if (content != null) {
                     messageContent = (message.getContent() instanceof MimeMultipart ?
-                            getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent);
+                            getTextFromMimeMultipart((MimeMultipart) message.getContent()) : content.toString());
                 }
                 for (FilterDTO filter : filters) {
                     if (filter.getType().getId() == FilterTypeDTO.IP_FILTER) {// filtering by sender ip
@@ -123,6 +126,7 @@ public class MailService {
                                 Pattern p = Pattern.compile("\\[(.*?)\\]");
                                 Matcher m = p.matcher(h.getValue());
                                 while (m.find()) {
+                                    senderIp = m.group(1);
                                     if (m.group(1).trim().equals(filter.getDesc().trim())) { // Sender IP equals filter value
                                         moveToMySpam = true;
                                     }
@@ -135,8 +139,10 @@ public class MailService {
                         }
                     }
 
-                    // mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
-                    //       new Timestamp(receiveDate.getTime()), messageContent, "", user, emailFolder));
+                    EmailFolders emFolder = (EmailFolders) mailDAO.find(EmailFolders.class, moveToMySpam ? EmailFolderDTO.SPAM : EmailFolderDTO.INBOX);
+                    mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
+                            new Timestamp(receiveDate.getTime()), messageContent, "", user,
+                            emFolder, senderIp));
 
                     message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
                 }
@@ -163,10 +169,10 @@ public class MailService {
         }
     }
 
-    private List<UsersDTO> getActiveUsersList() {
-        List<UsersDTO> users = new ArrayList<>();
-        List<UsersDTO> tmp = UsersDTO.parseToList(userDAO.getAll(Users.class));
-        for (UsersDTO user : tmp) {
+    private List<Users> getActiveUsersList() {
+        List<Users> tmp = userDAO.getAll(Users.class);
+        List<Users> users = new ArrayList<>();
+        for (Users user : tmp) {
             if (user.getEmail() != null && user.getEmailPassword() != null && user.getDeleted() != UsersDTO.DELETED) {
                 users.add(user);
             }
