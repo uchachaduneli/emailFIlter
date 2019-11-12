@@ -7,7 +7,7 @@
         $scope.page = 1;
         $scope.limit = "10";
         $scope.request = {};
-        $scope.srchCase = {folderId: 1};
+        $scope.srchCase = {folderId: 2};
 
         $scope.loadMainData = function () {
             $('#loadingModal').modal('show');

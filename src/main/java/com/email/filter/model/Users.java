@@ -10,6 +10,7 @@ public class Users {
     private String userDesc;
     private String userName;
     private String userPassword;
+    private String tempPassword;
     private UserTypes type;
     private Integer deleted;
     private String email;
@@ -105,5 +106,15 @@ public class Users {
 
     public void setCreateDate(Timestamp createDate) {
         this.createDate = createDate;
+    }
+
+    @Basic
+    @Column(name = "temp_password")
+    public String getTempPassword() {
+        return tempPassword;
+    }
+
+    public void setTempPassword(String tempPassword) {
+        this.tempPassword = tempPassword;
     }
 }

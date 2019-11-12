@@ -1,11 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@include file="header.jsp" %>
-<%
-
-%>
 
 <script>
-    app.controller("angController", function ($scope, $http, $filter) {
+    app.controller("angController", ['$scope', '$http', '$filter', '$document', function ($scope, $http, $filter, $document) {
+        $scope.currentUserId = angular.element('#userId').val();
         $scope.users = [];
         $scope.userTypes = [];
         $scope.userStatuses = [];
@@ -49,7 +47,7 @@
 
         $scope.init = function () {
             $scope.request = null;
-            $scope.request = {statusId: 1, typeId: 1};
+            $scope.request = {statusId: 1, typeId: 2};
         };
 
         $scope.save = function () {
@@ -88,7 +86,7 @@
 
         ajaxCall($http, "users/get-user-types", null, getUserTypes);
 
-    });
+    }]);
 </script>
 
 
@@ -133,20 +131,34 @@
                         <div class="form-group col-sm-10">
                             <label class="control-label col-sm-3">Email Password</label>
                             <div class="col-xs-9">
-                                <input type="text" ng-model="request.emailPassword" class="form-control input-sm">
+                                <input type="password" ng-model="request.emailPassword" class="form-control input-sm">
                             </div>
                         </div>
-                        <div class="form-group col-sm-10">
-                            <label class="control-label col-sm-3">Level</label>
-                            <div class="col-xs-9 btn-group">
-                                <select class="form-control" ng-model="request.typeId">
-                                    <option ng-repeat="s in userTypes"
-                                            ng-selected="s.userTypeId === request.type.userTypeId"
-                                            ng-value="s.userTypeId">{{s.userTypeName}}
-                                    </option>
-                                </select>
+                        <c:if test="<%= superAdmin %>">
+                            <div class="form-group col-sm-10">
+                                <label class="control-label col-sm-3">Level</label>
+                                <div class="col-xs-9 btn-group">
+                                    <select class="form-control" ng-model="request.typeId">
+                                        <option ng-repeat="s in userTypes"
+                                                ng-selected="s.userTypeId === request.type.userTypeId"
+                                                ng-value="s.userTypeId">{{s.userTypeName}}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
+                        </c:if>
+                        <c:if test="<%= admin %>">
+                            <div class="form-group col-sm-10">
+                                <label class="control-label col-sm-3">Level</label>
+                                <div class="col-xs-9 btn-group">
+                                    <select class="form-control" ng-model="request.typeId">
+                                        <option ng-selected="1 === request.type.userTypeId" ng-value="1">Admin</option>
+                                        <option ng-selected="2 === request.type.userTypeId" ng-value="2">Operator
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </c:if>
                         <div class="form-group col-sm-10">
                             <label class="control-label col-sm-3">Status</label>
                             <div class="col-xs-9 btn-group">
@@ -213,13 +225,32 @@
                             <small>{{r.createDate}}</small>
                         </td>
                         <td class="text-center">
-                            <a ng-click="edit(r.userId)" data-toggle="modal" data-target="#editModal"
-                               class="btn btn-xs">
-                                <i class="fa fa-pencil"></i>&nbsp;Edit
-                            </a>&nbsp;|&nbsp;
-                            <a ng-click="remove(r.userId)" class="btn btn-xs">
-                                <i class="fa fa-trash-o"></i>&nbsp;Remove
-                            </a>
+                            <c:if test="<%= superAdmin %>">
+                                <a ng-click="edit(r.userId)" data-toggle="modal" data-target="#editModal"
+                                   class="btn btn-xs">
+                                    <i class="fa fa-pencil"></i>&nbsp;Edit
+                                </a>&nbsp;
+                                |&nbsp;
+                                <a ng-click="remove(r.userId)" class="btn btn-xs">
+                                    <i class="fa fa-trash-o"></i>&nbsp;Remove
+                                </a>
+                            </c:if>
+                            <c:if test="<%= operator %>">
+                                <a ng-click="edit(r.userId)" ng-if="r.userId == currentUserId"
+                                   data-toggle="modal" data-target="#editModal" class="btn btn-xs">
+                                    <i class="fa fa-pencil"></i>&nbsp;Edit
+                                </a>&nbsp;
+                            </c:if>
+                            <c:if test="<%= admin %>">
+                                <a ng-click="edit(r.userId)" ng-if="r.type.userTypeId != 3" data-toggle="modal"
+                                   data-target="#editModal"
+                                   class="btn btn-xs">
+                                    <i class="fa fa-pencil"></i>&nbsp;Edit
+                                </a> &nbsp; |&nbsp;
+                                <a ng-click="remove(r.userId)" ng-if="r.type.userTypeId != 3" class="btn btn-xs">
+                                    <i class="fa fa-trash-o"></i>&nbsp;Remove
+                                </a>
+                            </c:if>
                         </td>
                     </tr>
                     </tbody>

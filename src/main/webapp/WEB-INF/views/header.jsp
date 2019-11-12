@@ -1,6 +1,11 @@
+<%@ page import="com.email.filter.dto.UsersDTO" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
+<%
+    boolean superAdmin = ((Integer) session.getAttribute("typeId") != null && (Integer) session.getAttribute("typeId") == UsersDTO.SUPER_ADMIN);
+    boolean operator = ((Integer) session.getAttribute("typeId") != null && (Integer) session.getAttribute("typeId") == UsersDTO.OPERATOR);
+    boolean admin = ((Integer) session.getAttribute("typeId") != null && (Integer) session.getAttribute("typeId") == UsersDTO.ADMIN);
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,6 +47,7 @@
 
     <script>
         $(document).ready(function () {
+
             $(".datepicker").datepicker();
             var url = window.location;
             $('.menuItem').filter(function () {
@@ -112,16 +118,6 @@
 
             <div class="navbar-custom-menu" ng-controller="profileCtrl">
                 <ul class="nav navbar-nav">
-                    <li>
-                        <a>
-                            <%--                            <i class="fa fa-comments fa-lg"></i>--%>
-                        </a>
-                    </li>
-                    <li>
-                        <a>
-                            <%--                            <i class="fa fa-bell fa-lg"></i>--%>
-                        </a>
-                    </li>
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-user"></i>
@@ -175,7 +171,13 @@
                     <li>
                         <a class="menuItem" href="emails">
                             <i class="fa fa-envelope"></i>
-                            <span>Emails</span>
+                            <span>Inbox</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menuItem" href="spam">
+                            <i class="fa fa-exclamation-circle"></i>
+                            <span>My Spam</span>
                         </a>
                     </li>
                     <li>
@@ -200,6 +202,7 @@
             <h4 id="selected_item"></h4>
         </section>
         <section class="content">
+            <input type="hidden" id="userId" value="<%=request.getSession().getAttribute("userId")%>">
             <div class="modal fade bs-example-modal-lg not-printable" id="loadingModal"
                  role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
                 <div class="modal-dialog" style="height: 80%; width: 120px;">

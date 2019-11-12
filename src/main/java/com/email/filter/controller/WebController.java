@@ -30,6 +30,11 @@ public class WebController {
         return "emails";
     }
 
+    @RequestMapping("/spam")
+    public String spam() {
+        return "spam";
+    }
+
     @RequestMapping("/")
     public String defaultFnc() {
         return "";

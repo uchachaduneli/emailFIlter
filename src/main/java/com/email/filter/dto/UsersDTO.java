@@ -13,10 +13,16 @@ public class UsersDTO {
 
     public static int DELETED = 1;
     public static int ACTIVE = 0;
+
+    public static int SUPER_ADMIN = 3;
+    public static int ADMIN = 1;
+    public static int OPERATOR = 2;
+
     private Integer userId;
     private String userDesc;
     private String userName;
     private String userPassword;
+    private String tempPassword;
     private UsersTypeDTO type;
     private Integer typeId;
     private Integer deleted;
@@ -38,6 +44,7 @@ public class UsersDTO {
             dto.setTypeId(record.getType().getUserTypeId());
             dto.setDeleted(record.getDeleted());
             dto.setCreateDate(record.getCreateDate());
+            dto.setTempPassword(record.getTempPassword());
             return dto;
         } else return null;
     }
@@ -48,6 +55,14 @@ public class UsersDTO {
             list.add(UsersDTO.parse(record));
         }
         return list;
+    }
+
+    public String getTempPassword() {
+        return tempPassword;
+    }
+
+    public void setTempPassword(String tempPassword) {
+        this.tempPassword = tempPassword;
     }
 
     public static int getDELETED() {

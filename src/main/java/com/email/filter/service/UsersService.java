@@ -55,7 +55,7 @@ public class UsersService {
         if (request.getUserId() == null) {
             user.setUserPassword(MD5Provider.doubleMd5(request.getUserPassword()));
         }
-        user.setType((UserTypes) userDAO.find(UserTypes.class, request.getTypeId()));
+        user.setType((UserTypes) userDAO.find(UserTypes.class, request.getTypeId() == null ? UsersDTO.OPERATOR : request.getTypeId()));
         user.setDeleted(request.getDeleted());
         user.setEmail(request.getEmail());
         user.setEmailPassword(request.getEmailPassword());
