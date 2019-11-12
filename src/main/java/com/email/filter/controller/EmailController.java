@@ -43,5 +43,10 @@ public class EmailController {
         return Response.withSuccess(mailService.getEmailFolders());
     }
 
-
+    @RequestMapping({"/delete"})
+    @ResponseBody
+    public Response deleteFilter(@RequestParam int id) {
+        mailService.delete(id);
+        return Response.withSuccess(true);
+    }
 }

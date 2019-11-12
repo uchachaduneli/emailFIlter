@@ -22,6 +22,21 @@
 
         $scope.loadMainData();
 
+        $scope.remove = function (id) {
+            if (confirm("Confirm Email deletion")) {
+                if (id != undefined) {
+                    function resFnc(res) {
+                        if (res.errorCode == 0) {
+                            successMsg('Operation Successful');
+                            $scope.loadMainData();
+                        }
+                    }
+
+                    ajaxCall($http, "emails/delete?id=" + id, null, resFnc);
+                }
+            }
+        };
+
         $scope.syncEmails = function () {
             $('#loadingModal').modal('show');
 
@@ -295,6 +310,9 @@
                                    data-target="#detailModal" class="btn btn-xs">
                                     <i class="fa fa-sticky-note-o"></i>&nbsp; Details
                                 </a>&nbsp;&nbsp;
+                                <a ng-click="remove(r.id)" class="btn btn-xs">
+                                    <i class="fa fa-trash-o"></i>&nbsp;Remove
+                                </a>
                             </td>
                         </tr>
                         </tbody>

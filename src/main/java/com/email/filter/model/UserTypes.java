@@ -3,7 +3,7 @@ package com.email.filter.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user_types")
+@Table(name = "user_types", schema = "emailfilter")
 public class UserTypes {
     private Integer userTypeId;
     private String userTypeName;

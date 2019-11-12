@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "email_folders")
+@Table(name = "email_folders", schema = "emailfilter")
 public class EmailFolders {
     private Integer id;
     private String name;

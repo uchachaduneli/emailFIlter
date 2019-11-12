@@ -2,29 +2,26 @@ package com.email.filter.Jobs;
 
 import com.email.filter.service.MailService;
 import org.apache.log4j.Logger;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
-public class Syncroniser implements Job {
+@Component
+public class Syncroniser {
 
     Logger logger = Logger.getLogger(Syncroniser.class);
 
-    @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    @Autowired
+    MailService mailService;
+
+    @Scheduled(fixedRate = 30000)
+    public void runTask() {
+        logger.debug("************ Syncronizer Started ************");
         try {
-            ApplicationContext applicationContext = (ApplicationContext) jobExecutionContext
-                    .getScheduler().getContext().get("applicationContext");
-
-            MailService ms = applicationContext.getBean(MailService.class);
-            ms.loadEmails();
-            System.out.println("Syncronizer Job executed at " + new Date());
-        } catch (Exception ex) {
-            logger.error("Syncronizer Method Failed", ex);
+            mailService.loadEmails();
+        } catch (Exception e) {
+            logger.error("************ Mail Syncronizatino Failed *************", e);
         }
+        logger.info("************ Syncronizer Ended ************");
     }
-
 }

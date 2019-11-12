@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "email")
+@Table(name = "email", schema = "emailfilter")
 public class Email {
     private Integer id;
     private Users user;
