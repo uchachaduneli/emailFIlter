@@ -25,6 +25,11 @@ public class WebController {
         return "login";
     }
 
+    @RequestMapping("/restore")
+    public String restore() {
+        return "restore";
+    }
+
     @RequestMapping("/emails")
     public String emails() {
         return "emails";

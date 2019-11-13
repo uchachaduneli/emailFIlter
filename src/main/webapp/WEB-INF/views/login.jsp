@@ -25,7 +25,7 @@
         });
 
         var app = angular.module("app", []);
-        app.controller("loginCtrl", function ($scope, $http, $location) {
+        app.controller("loginCtrl", function ($scope, $http, $location, $window) {
 
             $scope.user = {};
             $scope.request = {};
@@ -42,17 +42,19 @@
             };
 
             $scope.sendRestoreMail = function () {
+                closeModal('editModal');
+                $('#loadingModal').modal('show');
                 function resFunc(res) {
                     if (res.errorCode == 0) {
-                        successMsg('Password Sent, Check Email Please');
-                        closeModal('editModal');
+                        $window.location.href = "/emailFilter/restore";
                     } else {
                         errorMsg('Operation Failed');
                     }
                     $scope.request = {};
+                    $('#loadingModal').modal('hide');
                 }
 
-                ajaxCall($http, "restore-pass?username=" + $scope.request.username, null, resFunc);
+                ajaxCall($http, "send-restore-pass?username=" + $scope.request.username, null, resFunc);
             };
 
         });
@@ -64,7 +66,12 @@
 
 
 <div class="login-box" data-role="none" ng-controller="loginCtrl">
-
+    <div class="modal fade bs-example-modal-lg not-printable" id="loadingModal"
+         role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="height: 80%; width: 120px;">
+            <div class="loader" style="margin-top: 80%"></div>
+        </div>
+    </div>
     <div class="modal fade bs-example-modal-lg not-printable" id="editModal" role="dialog"
          aria-labelledby="editModalLabel"
          aria-hidden="true">
@@ -81,7 +88,7 @@
                             <div class="form-group col-sm-10 ">
                                 <label class="control-label col-sm-3">Username</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="username" name="username"
+                                    <input type="text" class="form-control" name="username"
                                            ng-model="request.username">
                                 </div>
                             </div>
@@ -106,12 +113,12 @@
         <p class="login-box-msg">Sign in to start your session</p>
         <form>
             <div class="form-group has-feedback">
-                <input type="text" class="form-control" id="username" name="username" ng-model="user.username"
+                <input type="text" class="form-control" name="username" ng-model="user.username"
                        placeholder="Username">
                 <span class="fa fa-user form-control-feedback"></span>
             </div>
             <div class="form-group has-feedback">
-                <input type="password" class="form-control" id="password" name="password" ng-model="user.password"
+                <input type="password" class="form-control" name="password" ng-model="user.password"
                        placeholder="Password">
                 <span class="fa fa-key form-control-feedback"></span>
             </div>

@@ -65,8 +65,10 @@
             <mvc:mapping path="/**"/>
             <mvc:exclude-mapping path="/"/>
             <mvc:exclude-mapping path="/login"/>
+            <mvc:exclude-mapping path="/restore"/>
+            <mvc:exclude-mapping path="/send-restore-pass"/>
             <mvc:exclude-mapping path="/logout"/>
-            <mvc:exclude-mapping path="/restore-pass"/>
+            <mvc:exclude-mapping path="/restore-password"/>
             <mvc:exclude-mapping path="/resources/**"/>
             <bean class="com.email.filter.security.AuthInterceptor"/>
         </mvc:interceptor>

@@ -8,7 +8,7 @@
         $scope.request = {};
 
         $scope.loadMainData = function () {
-            $('#loadingModal').modal('hide');
+            $('#loadingModal').modal('show');
 
             function getFilters(res) {
                 $scope.filters = res.data;

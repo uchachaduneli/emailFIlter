@@ -32,9 +32,12 @@ CREATE TABLE IF NOT EXISTS `email`
     `send_date`    timestamp NULL     DEFAULT NULL,
     `receive_date` timestamp NULL     DEFAULT NULL,
     PRIMARY KEY (`id`),
-    KEY `Index 2` (`user_id`) USING BTREE
+    KEY `Index 2` (`user_id`) USING BTREE,
+    KEY `FK_email_email_folders` (`folder_id`),
+    CONSTRAINT `FK_email_email_folders` FOREIGN KEY (`folder_id`) REFERENCES `email_folders` (`id`),
+    CONSTRAINT `FK_email_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 76
+  AUTO_INCREMENT = 119
   DEFAULT CHARSET = utf8;
 
 -- Dumping data for table emailfilter.email: ~3 rows (approximately)
@@ -42,13 +45,14 @@ CREATE TABLE IF NOT EXISTS `email`
     DISABLE KEYS */;
 INSERT INTO `email` (`id`, `user_id`, `from`, `to`, `subject`, `content`, `insert_date`, `uid`, `folder_id`,
                      `sender_ip`, `send_date`, `receive_date`)
-VALUES (73, 1, 'sadsa@gmail.com', 'me', 'babli bubli', 'this is content of email', '2019-11-07 01:54:03', NULL, 1, '',
-        NULL, NULL),
-       (74, 1, 'uchachaduneli@gmail.com', 'emailfilter19@gmail.com', 'test2', '\nthis is test message\'s content\r\n',
-        '2019-11-11 21:33:59', '', 2, '', '2019-11-11 00:30:24', '2019-11-11 00:30:35'),
-       (75, 1, 'emailfilter19@gmail.com', 'emailfilter19@gmail.com', 'test 3',
-        '\nthis is test N3 message\'s content\r\n', '2019-11-11 21:36:13', '', 2, '', '2019-11-11 21:36:03',
-        '2019-11-11 21:36:03');
+VALUES (116, 1, 'emailfilter19@gmail.com', 'emailfilter19@gmail.com', 'Ordinary email with no filtering content',
+        '\n123 123\r\n', '2019-11-12 21:32:15', '', 1, '', '2019-11-12 00:49:34', '2019-11-12 00:49:34'),
+       (117, 1, 'emailfilter19@gmail.com', 'emailfilter19@gmail.com', 'Password For emailFilter APP',
+        '\nYour Password for EmailFIlter APP IS: c2f0789e6ad28c3f6f85da1fb9828d79', '2019-11-12 21:32:16', '', 1, '',
+        '2019-11-12 01:01:38', '2019-11-12 01:01:38'),
+       (118, 1, 'asdsadsa', 'emailfilter19@gmail.com', 'Password For emailFilter APP',
+        '\nYour Password for EmailFIlter APP IS: c2f0789e6ad28c3f6f85da1fb9828d79', '2019-11-12 21:32:16', '', 2, '',
+        '2019-11-12 01:01:38', '2019-11-12 01:01:38');
 /*!40000 ALTER TABLE `email`
     ENABLE KEYS */;
 
@@ -83,14 +87,16 @@ CREATE TABLE IF NOT EXISTS `filter`
     KEY `FK_filter_filter_type` (`type_id`),
     CONSTRAINT `FK_filter_filter_type` FOREIGN KEY (`type_id`) REFERENCES `filter_type` (`id`)
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 3
+  AUTO_INCREMENT = 6
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.filter: ~1 rows (approximately)
+-- Dumping data for table emailfilter.filter: ~3 rows (approximately)
 /*!40000 ALTER TABLE `filter`
     DISABLE KEYS */;
 INSERT INTO `filter` (`id`, `desc`, `create_date`, `update_date`, `type_id`)
-VALUES (1, 'test', '2019-11-07 01:51:46', '2019-11-11 01:25:12', 1);
+VALUES (1, 'test', '2019-11-07 01:51:46', '2019-11-11 01:25:12', 1),
+       (4, 'you won prize', '2019-11-12 00:45:12', '2019-11-12 00:45:12', 1),
+       (5, 'you have been set', '2019-11-12 00:45:26', '2019-11-12 00:45:26', 1);
 /*!40000 ALTER TABLE `filter`
     ENABLE KEYS */;
 
@@ -120,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `users`
     `user_desc`      varchar(50)  NOT NULL,
     `user_name`      varchar(45)  NOT NULL,
     `user_password`  varchar(200) NOT NULL,
+    `temp_password`  varchar(200)          DEFAULT NULL,
     `type_id`        int(11)      NOT NULL,
     `deleted`        int(11)      NOT NULL DEFAULT '0',
     `email`          varchar(50)  NOT NULL,
@@ -130,16 +137,20 @@ CREATE TABLE IF NOT EXISTS `users`
     KEY `FK_users_config` (`type_id`),
     CONSTRAINT `FK_users_config` FOREIGN KEY (`type_id`) REFERENCES `user_types` (`user_type_id`)
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 27
+  AUTO_INCREMENT = 35
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.users: ~1 rows (approximately)
+-- Dumping data for table emailfilter.users: ~3 rows (approximately)
 /*!40000 ALTER TABLE `users`
     DISABLE KEYS */;
-INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `type_id`, `deleted`, `email`,
-                     `email_password`, `create_date`)
-VALUES (1, 'უჩა ჩადუნელი', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', 1, 0, 'emailfilter19@gmail.com', '123!@#asdASD',
-        '2019-11-03 00:58:32');
+INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `temp_password`, `type_id`, `deleted`,
+                     `email`, `email_password`, `create_date`)
+VALUES (1, 'Admin', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 1, 0, 'emailfilter19@gmail.com', '123!@#asdASD',
+        '2019-11-12 21:27:23'),
+       (29, 'SuperAdmin', 's', '3dad9cbf9baaa0360c0f2ba372d25716', NULL, 3, 0, 'emailfilter19@gmail.com',
+        '123!@#asdASD', '2019-11-14 00:43:42'),
+       (30, 'operator', 'o', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 2, 0, 'emailfilter19@gmail.com', '123!@#asdASD',
+        '2019-11-12 21:27:23');
 /*!40000 ALTER TABLE `users`
     ENABLE KEYS */;
 
@@ -153,12 +164,13 @@ CREATE TABLE IF NOT EXISTS `user_types`
   AUTO_INCREMENT = 7
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.user_types: ~2 rows (approximately)
+-- Dumping data for table emailfilter.user_types: ~3 rows (approximately)
 /*!40000 ALTER TABLE `user_types`
     DISABLE KEYS */;
 INSERT INTO `user_types` (`user_type_id`, `user_type_name`)
-VALUES (1, 'Administrator'),
-       (2, 'operator');
+VALUES (1, 'Admin'),
+       (2, 'operator'),
+       (3, 'SuperAdmin');
 /*!40000 ALTER TABLE `user_types`
     ENABLE KEYS */;
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Random;
 
 /**
  * @author
@@ -29,17 +30,26 @@ public class AuthController {
     @Autowired
     private MailService mailService;
 
-    @RequestMapping("/restore-pass")
+    @RequestMapping("/send-restore-pass")
     @ResponseBody
     public Response restorePassword(@RequestParam String username) throws Exception {
         try {
-            Users usr = usersService.getUserByEmail(username);
+            Users usr = usersService.getUserByUserName(username);
             if (usr == null) return Response.withError("UserName Not Found");
-            mailService.sendNotifUsingGmail(usr.getEmail(), "Password For emailFilter APP", "Your Password for EmailFIlter APP IS: " + usr.getUserPassword());
+            usr.setTempPassword(new Random().nextInt(10000) + "");
+            usersService.saveUserModel(usr);
+            mailService.sendNotifUsingGmail(usr.getEmail(), "Password For emailFilter APP",
+                    "Your One Time Password for EmailFIlter APP IS: " + usr.getTempPassword());
             return Response.withSuccess("Check Email, Password Sent to " + usr.getEmail());
         } catch (Exception e) {
             return Response.withError("Operation Failed !!!");
         }
+    }
+
+    @RequestMapping({"/restore-password"})
+    @ResponseBody
+    public Response restorePassword(@RequestParam String oneTimePass, @RequestParam String newpass) throws Exception {
+        return Response.withSuccess(usersService.restorePassword(oneTimePass, newpass));
     }
 
 

@@ -288,7 +288,6 @@
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Folder</th>
                             <th>From</th>
                             <th>To</th>
                             <th>Subject</th>
@@ -300,7 +299,6 @@
                         <tr ng-repeat="r in list" ng-dblclick="handleDoubleClick(r.id)">
 
                             <td>{{r.id}}</td>
-                            <td>{{r.folder.name}}</td>
                             <td>{{r.from}}</td>
                             <td>{{r.to}}</td>
                             <td>{{r.subject}}</td>

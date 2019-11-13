@@ -5,6 +5,7 @@ import com.email.filter.dto.UsersDTO;
 import com.email.filter.model.Users;
 import com.email.filter.utils.MD5Provider;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -27,6 +28,7 @@ public class UserDAO extends AbstractDAO {
         return entityManager;
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     public Users login(String username, String password) throws Exception {
         try {
 
@@ -38,6 +40,10 @@ public class UserDAO extends AbstractDAO {
             Users usr = query.getSingleResult();
             if (usr.getDeleted() == UsersDTO.DELETED)
                 throw new Exception("Your Account Is Disabled, Contact Administrator");
+            if (usr.getTempPassword() != null) {// remove One Time Password after using
+                usr.setTempPassword(null);
+                usr = (Users) this.update(usr);
+            }
             return usr;
         } catch (NoResultException | IndexOutOfBoundsException ex) {
             throw new Exception("User Not Found, Check Credentials");

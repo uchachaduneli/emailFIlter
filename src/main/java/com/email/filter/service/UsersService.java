@@ -34,7 +34,7 @@ public class UsersService {
     }
 
 
-    public Users getUserByEmail(String userName) {
+    public Users getUserByUserName(String userName) {
         List<ParamValuePair> paramValues = new ArrayList<>();
         paramValues.add(new ParamValuePair("userName", userName));
         List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
@@ -42,6 +42,20 @@ public class UsersService {
             return null;
         } else {
             return res.get(0);
+        }
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public Users restorePassword(String oneTimePass, String newpass) throws Exception {
+        List<ParamValuePair> paramValues = new ArrayList<>();
+        paramValues.add(new ParamValuePair("tempPassword", oneTimePass));
+        List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
+        if (res.isEmpty()) {
+            throw new Exception("Wrong One Time Password");
+        } else {
+            Users usr = res.get(0);
+            usr.setUserPassword(MD5Provider.doubleMd5(newpass));
+            return (Users) userDAO.update(usr);
         }
     }
 
@@ -91,6 +105,11 @@ public class UsersService {
         } else {
             return null;
         }
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public void saveUserModel(Users user) {
+        userDAO.update(user);
     }
 
     @Transactional(rollbackFor = Throwable.class)
