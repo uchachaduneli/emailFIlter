@@ -141,7 +141,8 @@ public class MailService {
                             }
                         }
                     } else {
-                        if (messageContent.contains(filter.getDesc())) {
+                        if (messageContent.toUpperCase().contains(filter.getDesc().toUpperCase()) ||
+                                subject.toUpperCase().contains(filter.getDesc().toUpperCase())) {
                             moveToMySpam = true;
                         }
                     }

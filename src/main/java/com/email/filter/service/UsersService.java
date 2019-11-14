@@ -29,8 +29,12 @@ public class UsersService {
     private UserDAO userDAO;
 
 
-    public List<UsersDTO> getUsers() {
-        return UsersDTO.parseToList(userDAO.getAll(Users.class));
+    public List<UsersDTO> getUsers(boolean isOperator) {
+        if (isOperator) {
+            return UsersDTO.parseToList(userDAO.getUsersByTypeId(UsersDTO.OPERATOR));
+        } else {
+            return UsersDTO.parseToList(userDAO.getAll(Users.class));
+        }
     }
 
 

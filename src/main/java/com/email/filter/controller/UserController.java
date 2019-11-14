@@ -27,8 +27,11 @@ public class UserController {
 
     @RequestMapping("/get-users")
     @ResponseBody
-    private Response getUsers() throws Exception {
-        return Response.withSuccess(userService.getUsers());
+    private Response getUsers(HttpServletRequest servletRequest) throws Exception {
+        Integer typeId = (Integer) servletRequest.getSession().getAttribute("typeId");
+        if (typeId != null && typeId == UsersDTO.OPERATOR) {
+            return Response.withSuccess(userService.getUsers(true));
+        } else return Response.withSuccess(userService.getUsers(false));
     }
 
     @RequestMapping("/get-user-types")

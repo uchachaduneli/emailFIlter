@@ -191,11 +191,14 @@
         <div class="box">
             <div class="box-header">
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-block btn-primary btn-md" ng-click="init()" data-toggle="modal"
-                            data-target="#editModal">
-                        <i class="fa fa-plus" aria-hidden="true"></i> &nbsp;
-                        Add User
-                    </button>
+                    <c:if test="<%= admin || superAdmin %>">
+                        <button type="button" class="btn btn-block btn-primary btn-md" ng-click="init()"
+                                data-toggle="modal"
+                                data-target="#editModal">
+                            <i class="fa fa-plus" aria-hidden="true"></i> &nbsp;
+                            Add User
+                        </button>
+                    </c:if>
                 </div>
             </div>
             <!-- /.box-header -->
