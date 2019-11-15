@@ -21,6 +21,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -43,6 +44,9 @@ public class MailService {
 
     @Autowired
     private FilterDAO filterDAO;
+
+    @Autowired
+    private FileService fileService;
 
     public static void main(String[] args) throws Exception {
         MailService ms = new MailService();
@@ -119,10 +123,41 @@ public class MailService {
                 String contentType = message.getContentType();
                 String senderIp = "";
                 String messageContent = "";
-                Object content = message.getContent();
-                if (content != null) {
-                    messageContent = (message.getContent() instanceof MimeMultipart ?
-                            getTextFromMimeMultipart((MimeMultipart) message.getContent()) : content.toString());
+                // store attachment file name, separated by comma
+                String attachFiles = "";
+                if (contentType.contains("multipart")) {
+                    // content may contain attachments
+                    Multipart multiPart = (Multipart) message.getContent();
+                    int numberOfParts = multiPart.getCount();
+                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
+                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                            // this part is attachment
+                            String fileName = part.getFileName();
+                            attachFiles += fileName + " ";
+                            part.saveFile(fileService.rootDir + File.separator + fileName);
+                        } else {
+                            // this part may be the message content
+                            if (inboxMails[i].isMimeType("text/plain")) {
+                                messageContent = inboxMails[i].getContent().toString();
+                            } else if (inboxMails[i].isMimeType("multipart/*")) {
+                                MimeMultipart mimeMultipart = (MimeMultipart) inboxMails[i].getContent();
+                                messageContent = getTextFromMimeMultipart(mimeMultipart);
+                            }
+//                            messageContent = part.getContent().toString();
+                        }
+                    }
+
+                    if (attachFiles.length() > 1) {
+                        attachFiles = attachFiles.substring(0, attachFiles.length() - 1);
+                    }
+                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
+
+                    Object content = message.getContent();
+                    if (content != null) {
+                        messageContent = (message.getContent() instanceof MimeMultipart ?
+                                getTextFromMimeMultipart((MimeMultipart) message.getContent()) : content.toString());
+                    }
                 }
                 for (FilterDTO filter : filters) {
                     if (filter.getType().getId() == FilterTypeDTO.IP_FILTER) {// filtering by sender ip
@@ -150,7 +185,7 @@ public class MailService {
                 EmailFolders emFolder = (EmailFolders) mailDAO.find(EmailFolders.class, moveToMySpam ? EmailFolderDTO.SPAM : EmailFolderDTO.INBOX);
                 mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
                         new Timestamp(receiveDate.getTime()), messageContent, "", user,
-                        emFolder, senderIp));
+                        emFolder, senderIp, attachFiles));
 
                 message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
                 if (moveToMySpam) {

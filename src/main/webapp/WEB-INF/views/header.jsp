@@ -54,9 +54,11 @@
                 return this.href.indexOf(url.pathname) > -1;
             }).addClass('active');
             if (url.pathname.indexOf("emails") > -1) {
-                $('#selected_item').text("Emails");
+                $('#selected_item').text("INBOX");
             } else if (url.pathname.indexOf("filters") > -1) {
                 $('#selected_item').text("Filters");
+            } else if (url.pathname.indexOf("spam") > -1) {
+                $('#selected_item').text("SPAM");
             }
 
 

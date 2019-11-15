@@ -26,6 +26,7 @@ public class EmailDTO {
     private EmailFolderDTO folder;
     private Integer folder_id;
     private String senderIp;
+    private String attachments;
 
     public static EmailDTO parse(Email record) {
         EmailDTO dto = new EmailDTO();
@@ -39,6 +40,7 @@ public class EmailDTO {
         dto.setContent(record.getContent());
         dto.setInsertDate(record.getInsertDate());
         dto.setSenderIp(record.getSenderIp());
+        dto.setAttachments(record.getAttachments());
         if (record.getFolder() != null) {
             dto.setFolder(EmailFolderDTO.parse(record.getFolder()));
             dto.setFolder_id(record.getFolder().getId());
@@ -52,6 +54,14 @@ public class EmailDTO {
             list.add(EmailDTO.parse(record));
         }
         return list;
+    }
+
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
     }
 
     public Integer getId() {

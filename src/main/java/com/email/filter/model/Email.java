@@ -18,9 +18,10 @@ public class Email {
     private Timestamp insertDate;
     private EmailFolders folder;
     private String senderIp;
+    private String attachments;
 
     public Email(String from, String to, String subject, Timestamp sendDate,
-                 Timestamp receiveDate, String content, String uid, Users user, EmailFolders folder, String senderIp) {
+                 Timestamp receiveDate, String content, String uid, Users user, EmailFolders folder, String senderIp, String attachments) {
         this.from = from;
         this.to = to;
         this.subject = subject;
@@ -31,6 +32,7 @@ public class Email {
         this.user = user;
         this.folder = folder;
         this.senderIp = senderIp;
+        this.attachments = attachments;
     }
 
     public Email() {
@@ -155,5 +157,15 @@ public class Email {
 
     public void setFolder(EmailFolders folder) {
         this.folder = folder;
+    }
+
+    @Basic
+    @Column(name = "attachments")
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
     }
 }

@@ -8,6 +8,7 @@
         $scope.limit = "10";
         $scope.request = {};
         $scope.srchCase = {folderId: 1};
+        $scope.attachmentNames = [];
 
         $scope.loadMainData = function () {
             $('#loadingModal').modal('show');
@@ -50,6 +51,8 @@
 
         $scope.init = function () {
             $scope.request = {};
+            $scope.attachmentNames = [];
+
         };
 
         function getUsers(res) {
@@ -160,6 +163,17 @@
                             <th class="text-right">CreateDate</th>
                             <td>{{slcted.insertDate}}</td>
                         </tr>
+                        <tr>
+                            <th class="text-right">Attachments</th>
+                            <td>{{slcted.attachments}}
+                                <ul>
+                                    <li ng-repeat="item in slcted.attachments.split(' ')"><a
+                                            href="misc/get-file?name={{item}}"
+                                            target="_blank">{{item}}</a>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
                     </table>
                     <div class="text-center" style="font-weight: bold;">Content &nbsp;&nbsp; &nbsp;
                         <i class="glyphicon glyphicon-new-window zoom fa-pulse pulse" style="font-size: 14px; "
@@ -227,15 +241,6 @@
                                     <input type="text" class="form-control srch"
                                            ng-model="srchCase.content" placeholder="Content">
                                 </div>
-                                <%--                                <div class="form-group col-md-2">--%>
-                                <%--                                    <select class="form-control" ng-model="srchCase.folderId"--%>
-                                <%--                                            ng-change="loadMainData()">--%>
-                                <%--                                        <option value="" selected="selected">Folder</option>--%>
-                                <%--                                        <option ng-repeat="v in folders" ng-selected="v.id === srchCase.folderId"--%>
-                                <%--                                                value="{{v.id}}">{{v.name}}--%>
-                                <%--                                        </option>--%>
-                                <%--                                    </select>--%>
-                                <%--                                </div>--%>
                                 <div class="form-group col-md-2">
                                     <select class="form-control" ng-model="srchCase.userId"
                                             ng-change="loadMainData()">

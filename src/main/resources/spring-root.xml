@@ -88,4 +88,8 @@
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
+    <bean name="fileService" class="com.email.filter.service.FileService">
+        <!--<property name="rootDir" value="F:/"/>-->
+        <property name="rootDir" value="C:/Users/ucha/Desktop/attachments/"/>
+    </bean>
 </beans>
