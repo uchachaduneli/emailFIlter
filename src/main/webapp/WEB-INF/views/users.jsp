@@ -152,8 +152,7 @@
                                 <label class="control-label col-sm-3">Level</label>
                                 <div class="col-xs-9 btn-group">
                                     <select class="form-control" ng-model="request.typeId">
-                                        <option ng-selected="1 === request.type.userTypeId" ng-value="1">Admin</option>
-                                        <option ng-selected="2 === request.type.userTypeId" ng-value="2">Operator
+                                        <option ng-selected="2 === request.type.userTypeId" ng-value="2">Users
                                         </option>
                                     </select>
                                 </div>

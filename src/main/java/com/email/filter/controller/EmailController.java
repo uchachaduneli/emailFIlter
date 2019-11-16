@@ -27,6 +27,7 @@ public class EmailController {
     @ResponseBody
     private Response getEmails(@RequestParam("start") int start, @RequestParam("limit") int limit,
                                @RequestBody MailRequest request, HttpServletRequest servletRequest) throws Exception {
+        request.setUserId((Integer) servletRequest.getSession().getAttribute("userId"));
         return Response.withSuccess(mailService.getEmails(start, limit, request));
     }
 

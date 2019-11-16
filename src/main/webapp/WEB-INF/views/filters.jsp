@@ -1,5 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@include file="header.jsp" %>
+<%--<%--%>
+<%--    if (operator) {--%>
+<%--        response.sendRedirect("/emailFilter/emails");--%>
+<%--    }--%>
+<%--%>--%>
 
 <script>
     app.controller("angController", function ($scope, $http, $filter) {
@@ -128,11 +133,14 @@
         <div class="box">
             <div class="box-header">
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-block btn-primary btn-md" ng-click="init()" data-toggle="modal"
-                            data-target="#editModal">
-                        <i class="fa fa-plus" aria-hidden="true"></i> &nbsp;
-                        Add Filter
-                    </button>
+                    <c:if test="<%= admin || superAdmin %>">
+                        <button type="button" class="btn btn-block btn-primary btn-md" ng-click="init()"
+                                data-toggle="modal"
+                                data-target="#editModal">
+                            <i class="fa fa-plus" aria-hidden="true"></i> &nbsp;
+                            Add Filter
+                        </button>
+                    </c:if>
                 </div>
             </div>
             <!-- /.box-header -->
@@ -145,7 +153,9 @@
                         <th>Type</th>
                         <th class="col-md-1 text-center">Create Date</th>
                         <th class="col-md-1 text-center">Update Date</th>
-                        <th class="col-md-2 text-center">Action</th>
+                        <c:if test="<%= admin || superAdmin %>">
+                            <th class="col-md-2 text-center">Action</th>
+                        </c:if>
                     </tr>
                     </thead>
                     <tbody>
@@ -159,15 +169,17 @@
                         <td class="text-center">
                             <small>{{r.updateDate}}</small>
                         </td>
-                        <td class="text-center">
-                            <a ng-click="edit(r.id)" data-toggle="modal" data-target="#editModal"
-                               class="btn btn-xs">
-                                <i class="fa fa-pencil"></i>&nbsp;Edit
-                            </a>&nbsp;|&nbsp;
-                            <a ng-click="remove(r.id)" class="btn btn-xs">
-                                <i class="fa fa-trash-o"></i>&nbsp;Remove
-                            </a>
-                        </td>
+                        <c:if test="<%= admin || superAdmin %>">
+                            <td class="text-center">
+                                <a ng-click="edit(r.id)" data-toggle="modal" data-target="#editModal"
+                                   class="btn btn-xs">
+                                    <i class="fa fa-pencil"></i>&nbsp;Edit
+                                </a>&nbsp;|&nbsp;
+                                <a ng-click="remove(r.id)" class="btn btn-xs">
+                                    <i class="fa fa-trash-o"></i>&nbsp;Remove
+                                </a>
+                            </td>
+                        </c:if>
                     </tr>
                     </tbody>
                 </table>

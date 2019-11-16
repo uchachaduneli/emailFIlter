@@ -182,12 +182,14 @@
                             <span>My Spam</span>
                         </a>
                     </li>
+                    <%--                    <c:if test="<%= admin || superAdmin %>">--%>
                     <li>
                         <a class="menuItem" href="filters">
                             <i class="fa fa-filter"></i>
                             <span>Filters</span>
                         </a>
                     </li>
+                    <%--                    </c:if>--%>
                     <li>
                         <a href="users">
                             <i class="fa fa-users"></i>

@@ -97,117 +97,119 @@ public class MailService {
         logger.debug("Syncronizer method started" + getActiveUsersList().size());
         List<FilterDTO> filters = getFilters();
         for (Users user : getActiveUsersList()) {
-            Properties props2 = System.getProperties();
-            props2.put("mail.smtp.host", "smtp.gmail.com");
-            props2.put("mail.smtp.socketFactory.port", "465");
-            props2.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-            props2.put("mail.smtp.port", "465");
-            props2.put("mail.smtp.auth", "true");
-            Session emailSession = Session.getDefaultInstance(props2, null);
-            Store store = emailSession.getStore("imaps");
-            store.connect("smtp.gmail.com", user.getEmail(), user.getEmailPassword());
+            if (user.getEmail() != null && !user.getEmail().equals("") && user.getEmailPassword() != null && !user.getEmailPassword().equals("")) {
+                Properties props2 = System.getProperties();
+                props2.put("mail.smtp.host", "smtp.gmail.com");
+                props2.put("mail.smtp.socketFactory.port", "465");
+                props2.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+                props2.put("mail.smtp.port", "465");
+                props2.put("mail.smtp.auth", "true");
+                Session emailSession = Session.getDefaultInstance(props2, null);
+                Store store = emailSession.getStore("imaps");
+                store.connect("smtp.gmail.com", user.getEmail(), user.getEmailPassword());
 
-            Folder inboxFolder = store.getFolder("INBOX");//get inbox
-            Folder spamFolder = store.getFolder("MySpam");
-            inboxFolder.open(Folder.READ_WRITE);//open folder only to read
-            Message inboxMails[] = inboxFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-            List<Email> emails = new ArrayList<>();
-            for (int i = 0; i < inboxMails.length; i++) {
-                boolean moveToMySpam = false;
-                Message message = inboxMails[i];
-                Address[] fromAddress = message.getFrom();
-                String from = ((InternetAddress) fromAddress[0]).getAddress();
-                String subject = message.getSubject();
-                Date sentDate = message.getSentDate();
-                Date receiveDate = message.getReceivedDate();
-                String contentType = message.getContentType();
-                String senderIp = "";
-                String messageContent = "";
-                // store attachment file name, separated by comma
-                String attachFiles = "";
-                if (contentType.contains("multipart")) {
-                    // content may contain attachments
-                    Multipart multiPart = (Multipart) message.getContent();
-                    int numberOfParts = multiPart.getCount();
-                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
-                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                            // this part is attachment
-                            String fileName = part.getFileName();
-                            attachFiles += fileName + " ";
-                            part.saveFile(fileService.rootDir + File.separator + fileName);
-                        } else {
-                            // this part may be the message content
-                            if (inboxMails[i].isMimeType("text/plain")) {
-                                messageContent = inboxMails[i].getContent().toString();
-                            } else if (inboxMails[i].isMimeType("multipart/*")) {
-                                MimeMultipart mimeMultipart = (MimeMultipart) inboxMails[i].getContent();
-                                messageContent = getTextFromMimeMultipart(mimeMultipart);
-                            }
+                Folder inboxFolder = store.getFolder("INBOX");//get inbox
+                Folder spamFolder = store.getFolder("MySpam");
+                inboxFolder.open(Folder.READ_WRITE);//open folder only to read
+                Message inboxMails[] = inboxFolder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+                List<Email> emails = new ArrayList<>();
+                for (int i = 0; i < inboxMails.length; i++) {
+                    boolean moveToMySpam = false;
+                    Message message = inboxMails[i];
+                    Address[] fromAddress = message.getFrom();
+                    String from = ((InternetAddress) fromAddress[0]).getAddress();
+                    String subject = message.getSubject();
+                    Date sentDate = message.getSentDate();
+                    Date receiveDate = message.getReceivedDate();
+                    String contentType = message.getContentType();
+                    String senderIp = "";
+                    String messageContent = "";
+                    // store attachment file name, separated by comma
+                    String attachFiles = "";
+                    if (contentType.contains("multipart")) {
+                        // content may contain attachments
+                        Multipart multiPart = (Multipart) message.getContent();
+                        int numberOfParts = multiPart.getCount();
+                        for (int partCount = 0; partCount < numberOfParts; partCount++) {
+                            MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+                            if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+                                // this part is attachment
+                                String fileName = part.getFileName();
+                                attachFiles += fileName + " ";
+                                part.saveFile(fileService.rootDir + File.separator + fileName);
+                            } else {
+                                // this part may be the message content
+                                if (inboxMails[i].isMimeType("text/plain")) {
+                                    messageContent = inboxMails[i].getContent().toString();
+                                } else if (inboxMails[i].isMimeType("multipart/*")) {
+                                    MimeMultipart mimeMultipart = (MimeMultipart) inboxMails[i].getContent();
+                                    messageContent = getTextFromMimeMultipart(mimeMultipart);
+                                }
 //                            messageContent = part.getContent().toString();
+                            }
+                        }
+
+                        if (attachFiles.length() > 1) {
+                            attachFiles = attachFiles.substring(0, attachFiles.length() - 1);
+                        }
+                    } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
+
+                        Object content = message.getContent();
+                        if (content != null) {
+                            messageContent = (message.getContent() instanceof MimeMultipart ?
+                                    getTextFromMimeMultipart((MimeMultipart) message.getContent()) : content.toString());
                         }
                     }
-
-                    if (attachFiles.length() > 1) {
-                        attachFiles = attachFiles.substring(0, attachFiles.length() - 1);
-                    }
-                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
-
-                    Object content = message.getContent();
-                    if (content != null) {
-                        messageContent = (message.getContent() instanceof MimeMultipart ?
-                                getTextFromMimeMultipart((MimeMultipart) message.getContent()) : content.toString());
-                    }
-                }
-                for (FilterDTO filter : filters) {
-                    if (filter.getType().getId() == FilterTypeDTO.IP_FILTER) {// filtering by sender ip
-                        Enumeration headers = message.getAllHeaders();
-                        while (headers.hasMoreElements()) {
-                            Header h = (Header) headers.nextElement();
-                            if (h.getName().equals("Received") && h.getValue().contains("from")) {
-                                Pattern p = Pattern.compile("\\[(.*?)\\]");
-                                Matcher m = p.matcher(h.getValue());
-                                while (m.find()) {
-                                    senderIp = m.group(1);
-                                    if (m.group(1).trim().equals(filter.getDesc().trim())) { // Sender IP equals filter value
-                                        moveToMySpam = true;
+                    for (FilterDTO filter : filters) {
+                        if (filter.getType().getId() == FilterTypeDTO.IP_FILTER) {// filtering by sender ip
+                            Enumeration headers = message.getAllHeaders();
+                            while (headers.hasMoreElements()) {
+                                Header h = (Header) headers.nextElement();
+                                if (h.getName().equals("Received") && h.getValue().contains("from")) {
+                                    Pattern p = Pattern.compile("\\[(.*?)\\]");
+                                    Matcher m = p.matcher(h.getValue());
+                                    while (m.find()) {
+                                        senderIp = m.group(1);
+                                        if (m.group(1).trim().equals(filter.getDesc().trim())) { // Sender IP equals filter value
+                                            moveToMySpam = true;
+                                        }
                                     }
                                 }
                             }
-                        }
-                    } else {
-                        if (messageContent.toUpperCase().contains(filter.getDesc().toUpperCase()) ||
-                                subject.toUpperCase().contains(filter.getDesc().toUpperCase())) {
-                            moveToMySpam = true;
+                        } else {
+                            if (messageContent.toUpperCase().contains(filter.getDesc().toUpperCase()) ||
+                                    subject.toUpperCase().contains(filter.getDesc().toUpperCase())) {
+                                moveToMySpam = true;
+                            }
                         }
                     }
-                }
-                EmailFolders emFolder = (EmailFolders) mailDAO.find(EmailFolders.class, moveToMySpam ? EmailFolderDTO.SPAM : EmailFolderDTO.INBOX);
-                mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
-                        new Timestamp(receiveDate.getTime()), messageContent, "", user,
-                        emFolder, senderIp, attachFiles));
+                    EmailFolders emFolder = (EmailFolders) mailDAO.find(EmailFolders.class, moveToMySpam ? EmailFolderDTO.SPAM : EmailFolderDTO.INBOX);
+                    mailDAO.create(new Email(from, user.getEmail(), subject, new Timestamp(sentDate.getTime()),
+                            new Timestamp(receiveDate.getTime()), messageContent, "", user,
+                            emFolder, senderIp, attachFiles));
 
-                message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
-                if (moveToMySpam) {
-                    //                moving messages to proper folder
-                    List<Message> tempList = new ArrayList<>();
-                    tempList.add(message);
-                    Message[] tempMessageArray = tempList.toArray(new Message[tempList.size()]);
-                    inboxFolder.copyMessages(tempMessageArray, spamFolder);
+                    message.setFlag(Flags.Flag.SEEN, true);//set Seen flag or move to correct folder and delete from incorrect one here
+                    if (moveToMySpam) {
+                        //                moving messages to proper folder
+                        List<Message> tempList = new ArrayList<>();
+                        tempList.add(message);
+                        Message[] tempMessageArray = tempList.toArray(new Message[tempList.size()]);
+                        inboxFolder.copyMessages(tempMessageArray, spamFolder);
 
-                    //				print out details of each message
-                    System.out.println("\t From: " + from);
-                    System.out.println("\t Subject: " + subject);
-                    System.out.println("\t Sent Date: " + sentDate);
-                    System.out.println("\t Receive Date: " + receiveDate);
-                    System.out.println("\t Message: " +
-                            (message.getContent() instanceof MimeMultipart ?
-                                    getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent)
-                            + " \n ***********   NEXT ONE    ********** \n");
+                        //				print out details of each message
+                        System.out.println("\t From: " + from);
+                        System.out.println("\t Subject: " + subject);
+                        System.out.println("\t Sent Date: " + sentDate);
+                        System.out.println("\t Receive Date: " + receiveDate);
+                        System.out.println("\t Message: " +
+                                (message.getContent() instanceof MimeMultipart ?
+                                        getTextFromMimeMultipart((MimeMultipart) message.getContent()) : messageContent)
+                                + " \n ***********   NEXT ONE    ********** \n");
+                    }
                 }
+                inboxFolder.close(true);
+                store.close();
             }
-            inboxFolder.close(true);
-            store.close();
         }
     }
 
