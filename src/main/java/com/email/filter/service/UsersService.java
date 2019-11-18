@@ -1,6 +1,5 @@
 package com.email.filter.service;
 
-
 import com.email.filter.dao.ParamValuePair;
 import com.email.filter.dao.UserDAO;
 import com.email.filter.dto.UsersDTO;
@@ -23,112 +22,110 @@ import java.util.List;
  */
 @Service
 public class UsersService {
-    Logger logger = Logger.getLogger(UsersService.class);
+	Logger logger = Logger.getLogger(UsersService.class);
 
-    @Autowired
-    private UserDAO userDAO;
+	@Autowired
+	private UserDAO userDAO;
 
+	public List<UsersDTO> getUsers(Integer typeId, Integer userId) {
+		if (typeId != UsersDTO.SUPER_ADMIN) {
+			return UsersDTO.parseToList(userDAO.getUsersByTypeId(typeId, userId));
+		} else {
+			return UsersDTO.parseToList(userDAO.getAll(Users.class));
+		}
+	}
 
-    public List<UsersDTO> getUsers(boolean isOperator) {
-        if (isOperator) {
-            return UsersDTO.parseToList(userDAO.getUsersByTypeId(UsersDTO.OPERATOR));
-        } else {
-            return UsersDTO.parseToList(userDAO.getAll(Users.class));
-        }
-    }
+	public Users getUserByUserName(String userName) {
+		List<ParamValuePair> paramValues = new ArrayList<>();
+		paramValues.add(new ParamValuePair("userName", userName));
+		List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
+		if (res.isEmpty()) {
+			return null;
+		} else {
+			return res.get(0);
+		}
+	}
 
+	@Transactional(rollbackFor = Throwable.class)
+	public Users restorePassword(String oneTimePass, String newpass) throws Exception {
+		List<ParamValuePair> paramValues = new ArrayList<>();
+		paramValues.add(new ParamValuePair("tempPassword", oneTimePass));
+		List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
+		if (res.isEmpty()) {
+			throw new Exception("Wrong One Time Password");
+		} else {
+			Users usr = res.get(0);
+			usr.setUserPassword(MD5Provider.doubleMd5(newpass));
+			return (Users) userDAO.update(usr);
+		}
+	}
 
-    public Users getUserByUserName(String userName) {
-        List<ParamValuePair> paramValues = new ArrayList<>();
-        paramValues.add(new ParamValuePair("userName", userName));
-        List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
-        if (res.isEmpty()) {
-            return null;
-        } else {
-            return res.get(0);
-        }
-    }
+	@Transactional(rollbackFor = Throwable.class)
+	public Users saveUser(AddUserRequest request) throws Exception {
 
-    @Transactional(rollbackFor = Throwable.class)
-    public Users restorePassword(String oneTimePass, String newpass) throws Exception {
-        List<ParamValuePair> paramValues = new ArrayList<>();
-        paramValues.add(new ParamValuePair("tempPassword", oneTimePass));
-        List<Users> res = userDAO.getAllByParamValue(Users.class, paramValues, null);
-        if (res.isEmpty()) {
-            throw new Exception("Wrong One Time Password");
-        } else {
-            Users usr = res.get(0);
-            usr.setUserPassword(MD5Provider.doubleMd5(newpass));
-            return (Users) userDAO.update(usr);
-        }
-    }
+		Users user = new Users();
 
-    @Transactional(rollbackFor = Throwable.class)
-    public Users saveUser(AddUserRequest request) throws Exception {
+		user.setUserDesc(request.getUserDesc());
+		user.setUserName(request.getUserName());
+		if (request.getUserId() == null) {
+			user.setUserPassword(MD5Provider.doubleMd5(request.getUserPassword()));
+		}
+		user.setType((UserTypes) userDAO.find(UserTypes.class, request.getTypeId() == null ? UsersDTO.OPERATOR : request.getTypeId()));
+		user.setDeleted(request.getDeleted());
+		user.setEmail(request.getEmail());
+		user.setEmailPassword(request.getEmailPassword());
 
-        Users user = new Users();
+		if (request.getUserId() != null) {
+			user.setUserId(request.getUserId());
+			Users tmp = (Users) userDAO.find(Users.class, request.getUserId());
+			if (!request.getUserPassword().equals(tmp.getUserPassword())) {
+				user.setUserPassword(MD5Provider.doubleMd5(request.getUserPassword()));
+			} else {
+				user.setUserPassword(request.getUserPassword());
+			}
+			user = (Users) userDAO.update(user);
+		} else {
+			user = (Users) userDAO.create(user);
+		}
+		return user;
+	}
 
-        user.setUserDesc(request.getUserDesc());
-        user.setUserName(request.getUserName());
-        if (request.getUserId() == null) {
-            user.setUserPassword(MD5Provider.doubleMd5(request.getUserPassword()));
-        }
-        user.setType((UserTypes) userDAO.find(UserTypes.class, request.getTypeId() == null ? UsersDTO.OPERATOR : request.getTypeId()));
-        user.setDeleted(request.getDeleted());
-        user.setEmail(request.getEmail());
-        user.setEmailPassword(request.getEmailPassword());
+	@Transactional(rollbackFor = Throwable.class)
+	public UsersDTO changePassword(Integer userId, String pass, String newpass) throws IOException {
 
-        if (request.getUserId() != null) {
-            user.setUserId(request.getUserId());
-            Users tmp = (Users) userDAO.find(Users.class, request.getUserId());
-            if (!request.getUserPassword().equals(tmp.getUserPassword())) {
-                user.setUserPassword(MD5Provider.doubleMd5(request.getUserPassword()));
-            } else {
-                user.setUserPassword(request.getUserPassword());
-            }
-            user = (Users) userDAO.update(user);
-        } else {
-            user = (Users) userDAO.create(user);
-        }
-        return user;
-    }
+		Users user = userDAO.getEntityManager().find(Users.class, userId);
+		if (user.getUserPassword().equals(MD5Provider.doubleMd5(pass))) {
 
-    @Transactional(rollbackFor = Throwable.class)
-    public UsersDTO changePassword(Integer userId, String pass, String newpass) throws IOException {
+			if (user.getUserId() != null) {
+				user.setUserPassword(MD5Provider.doubleMd5(newpass));
+				user = (Users) userDAO.update(user);
+			}
 
-        Users user = userDAO.getEntityManager().find(Users.class, userId);
-        if (user.getUserPassword().equals(MD5Provider.doubleMd5(pass))) {
+			return UsersDTO.parse(user);
 
-            if (user.getUserId() != null) {
-                user.setUserPassword(MD5Provider.doubleMd5(newpass));
-                user = (Users) userDAO.update(user);
-            }
+		} else {
+			return null;
+		}
+	}
 
-            return UsersDTO.parse(user);
+	@Transactional(rollbackFor = Throwable.class)
+	public void saveUserModel(Users user) {
+		userDAO.update(user);
+	}
 
-        } else {
-            return null;
-        }
-    }
+	@Transactional(rollbackFor = Throwable.class)
+	public void delete(int id) {
+		Users user = (Users) userDAO.find(Users.class, id);
+		if (user != null) {
+			userDAO.delete(user);
+		}
+	}
 
-    @Transactional(rollbackFor = Throwable.class)
-    public void saveUserModel(Users user) {
-        userDAO.update(user);
-    }
+	public UsersDTO login(String username, String password) throws Exception {
+		return UsersDTO.parse(userDAO.login(username, password));
+	}
 
-    @Transactional(rollbackFor = Throwable.class)
-    public void delete(int id) {
-        Users user = (Users) userDAO.find(Users.class, id);
-        if (user != null) {
-            userDAO.delete(user);
-        }
-    }
-
-    public UsersDTO login(String username, String password) throws Exception {
-        return UsersDTO.parse(userDAO.login(username, password));
-    }
-
-    public List<UsersTypeDTO> getUserTypes() {
-        return UsersTypeDTO.parseToList(userDAO.getAll(UserTypes.class));
-    }
+	public List<UsersTypeDTO> getUserTypes() {
+		return UsersTypeDTO.parseToList(userDAO.getAll(UserTypes.class));
+	}
 }

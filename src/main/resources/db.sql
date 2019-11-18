@@ -1,6 +1,6 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               5.7.17-log - MySQL Community Server (GPL)
+-- Server version:               5.7.20-log - MySQL Community Server (GPL)
 -- Server OS:                    Win64
 -- HeidiSQL Version:             10.2.0.5599
 -- --------------------------------------------------------
@@ -41,21 +41,21 @@ CREATE TABLE IF NOT EXISTS `email`
   AUTO_INCREMENT = 16
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.email: ~2 rows (approximately)
+-- Dumping data for table emailfilter.email: ~3 rows (approximately)
 /*!40000 ALTER TABLE `email`
     DISABLE KEYS */;
-INSERT INTO `email` (`id`, `user_id`, `from`, `to`, `subject`, `content`, `insert_date`, `uid`, `folder_id`,
-                     `sender_ip`, `send_date`, `receive_date`, `attachments`)
-VALUES (11, 2, 'super', 'emailfilter19@gmail.com', 'attachs', '\n\r\n', '2019-11-16 00:42:33', '', 1, '',
-        '2019-11-15 23:15:39', '2019-11-15 23:15:39', 'pdf-test.pdf Test_image123.jpg'),
-       (12, 1, 'admin', 'emailfilter19@gmail.com', 'asd', '\n\r\n', '2019-11-16 00:42:34', '', 1, '',
-        '2019-11-15 23:18:31', '2019-11-15 23:18:31', '_pdf-test.pdf'),
-       (13, 3, 'operator1', 'emailfilter19@gmail.com', 'asd', '\n\r\n', '2019-11-16 00:42:34', '', 1, '',
-        '2019-11-15 23:18:31', '2019-11-15 23:18:31', '_pdf-test.pdf'),
-       (14, 32, 'operator2', 'emailfilter19@gmail.com', 'asd', '\n\r\n', '2019-11-16 00:42:34', '', 1, '',
-        '2019-11-15 23:18:31', '2019-11-15 23:18:31', '_pdf-test.pdf'),
-       (15, 3, 'operator1', 'emailfilter19@gmail.com', 'asd2', '\n\r\n', '2019-11-16 00:42:34', '', 1, '',
-        '2019-11-15 23:18:31', '2019-11-15 23:18:31', '_pdf-test.pdf');
+INSERT INTO `email` (`id`, `user_id`, `from`, `to`, `subject`, `content`, `insert_date`, `uid`, `folder_id`, `sender_ip`, `send_date`, `receive_date`,
+                     `attachments`)
+VALUES (11, 2, 'super', 'emailfilter19@gmail.com', 'attachs', '\n\r\n', '2019-11-16 00:42:33', '', 1, '', '2019-11-15 23:15:39',
+        '2019-11-15 23:15:39', 'pdf-test.pdf Test_image123.jpg'),
+       (12, 1, 'admin', 'emailfilter19@gmail.com', 'asd', '\n\r\n', '2019-11-16 00:42:34', '', 1, '', '2019-11-15 23:18:31', '2019-11-15 23:18:31',
+        '_pdf-test.pdf'),
+       (13, 3, 'operator1', 'emailfilter19@gmail.com', 'asd', '\n\r\n', '2019-11-16 00:42:34', '', 1, '', '2019-11-15 23:18:31',
+        '2019-11-15 23:18:31', '_pdf-test.pdf'),
+       (14, 32, 'operator2', 'emailfilter19@gmail.com', 'asd', '\n\r\n', '2019-11-16 00:42:34', '', 1, '', '2019-11-15 23:18:31',
+        '2019-11-15 23:18:31', '_pdf-test.pdf'),
+       (15, 3, 'operator1', 'emailfilter19@gmail.com', 'asd2', '\n\r\n', '2019-11-16 00:42:34', '', 1, '', '2019-11-15 23:18:31',
+        '2019-11-15 23:18:31', '_pdf-test.pdf');
 /*!40000 ALTER TABLE `email`
     ENABLE KEYS */;
 
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `filter`
   AUTO_INCREMENT = 6
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.filter: ~1 rows (approximately)
+-- Dumping data for table emailfilter.filter: ~2 rows (approximately)
 /*!40000 ALTER TABLE `filter`
     DISABLE KEYS */;
 INSERT INTO `filter` (`id`, `desc`, `create_date`, `update_date`, `type_id`)
@@ -139,19 +139,19 @@ CREATE TABLE IF NOT EXISTS `users`
     KEY `FK_users_config` (`type_id`),
     CONSTRAINT `FK_users_config` FOREIGN KEY (`type_id`) REFERENCES `user_types` (`user_type_id`)
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 33
+  AUTO_INCREMENT = 34
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.users: ~3 rows (approximately)
+-- Dumping data for table emailfilter.users: ~0 rows (approximately)
 /*!40000 ALTER TABLE `users`
     DISABLE KEYS */;
-INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `temp_password`, `type_id`, `deleted`,
-                     `email`, `email_password`, `create_date`)
-VALUES (1, 'Admin', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 1, 0, '', '', '2019-11-17 00:11:44'),
-       (2, 'SuperAdmin', 's', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 3, 0, 'emailfilter19@gmail.com', '123!@#asdASD',
-        '2019-11-17 00:12:19'),
+INSERT INTO `users` (`user_id`, `user_desc`, `user_name`, `user_password`, `temp_password`, `type_id`, `deleted`, `email`, `email_password`,
+                     `create_date`)
+VALUES (1, 'Admin', 'a', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 1, 0, '', '', '2019-11-18 12:28:59'),
+       (2, 'SuperAdmin', 's', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 3, 0, 'emailfilter19@gmail.com', '123!@#asdASD', '2019-11-17 00:12:19'),
        (3, 'operator', 'o', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 2, 0, '', '', '2019-11-17 00:11:46'),
-       (32, 'operator2', 'o2', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 2, 0, '', '', '2019-11-17 00:11:47');
+       (32, 'operator2', 'o2', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 2, 0, '', '', '2019-11-17 00:11:47'),
+       (33, 'Admin2', 'a2', 'c2f0789e6ad28c3f6f85da1fb9828d79', NULL, 1, 0, '', '', '2019-11-18 12:29:04');
 /*!40000 ALTER TABLE `users`
     ENABLE KEYS */;
 
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `user_types`
   AUTO_INCREMENT = 4
   DEFAULT CHARSET = utf8;
 
--- Dumping data for table emailfilter.user_types: ~2 rows (approximately)
+-- Dumping data for table emailfilter.user_types: ~0 rows (approximately)
 /*!40000 ALTER TABLE `user_types`
     DISABLE KEYS */;
 INSERT INTO `user_types` (`user_type_id`, `user_type_name`)

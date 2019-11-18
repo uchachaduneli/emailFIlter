@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 /**
  * @author
  */
@@ -22,50 +21,52 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class UserController {
 
-    @Autowired
-    private UsersService userService;
+	@Autowired
+	private UsersService userService;
 
-    @RequestMapping("/get-users")
-    @ResponseBody
-    private Response getUsers(HttpServletRequest servletRequest) throws Exception {
-        Integer typeId = (Integer) servletRequest.getSession().getAttribute("typeId");
-        if (typeId != null && typeId == UsersDTO.OPERATOR) {
-            return Response.withSuccess(userService.getUsers(true));
-        } else return Response.withSuccess(userService.getUsers(false));
-    }
+	@RequestMapping("/get-users")
+	@ResponseBody
+	private Response getUsers(HttpServletRequest servletRequest) throws Exception {
+		Integer typeId = (Integer) servletRequest.getSession().getAttribute("typeId");
+		Integer userId = (Integer) servletRequest.getSession().getAttribute("userId");
+		//if (typeId != null && (typeId == UsersDTO.OPERATOR || typeId == UsersDTO.ADMIN)) {
+		if (typeId != null && userId != null) {
+			return Response.withSuccess(userService.getUsers(typeId, userId));
+		} else return Response.withError("Can't Determine User Loggined User");
+	}
 
-    @RequestMapping("/get-user-types")
-    @ResponseBody
-    private Response getUserTypes() throws Exception {
-        return Response.withSuccess(userService.getUserTypes());
-    }
+	@RequestMapping("/get-user-types")
+	@ResponseBody
+	private Response getUserTypes() throws Exception {
+		return Response.withSuccess(userService.getUserTypes());
+	}
 
-    @RequestMapping({"/save-user"})
-    @ResponseBody
-    public Response saveUser(@RequestBody AddUserRequest request) throws Exception {
-        try {
-            return Response.withSuccess(UsersDTO.parse(userService.saveUser(request)));
-        } catch (DataIntegrityViolationException e) {
-            return Response.withError("Username Already Used, Please Try Another One");
-        }
-    }
+	@RequestMapping({ "/save-user" })
+	@ResponseBody
+	public Response saveUser(@RequestBody AddUserRequest request) throws Exception {
+		try {
+			return Response.withSuccess(UsersDTO.parse(userService.saveUser(request)));
+		} catch (DataIntegrityViolationException e) {
+			return Response.withError("Username Already Used, Please Try Another One");
+		}
+	}
 
-    @RequestMapping({"/change-password"})
-    @ResponseBody
-    public Response saveUser(HttpServletRequest servletRequest, @RequestParam String pass, @RequestParam String newpass) throws Exception {
-        Integer userId = (Integer) servletRequest.getSession().getAttribute("userId");
-        if (userId != null) {
-            return Response.withSuccess(userService.changePassword(userId, pass, newpass));
-        } else {
-            return Response.withError("Please Login To For Changing Password");
-        }
-    }
+	@RequestMapping({ "/change-password" })
+	@ResponseBody
+	public Response saveUser(HttpServletRequest servletRequest, @RequestParam String pass, @RequestParam String newpass) throws Exception {
+		Integer userId = (Integer) servletRequest.getSession().getAttribute("userId");
+		if (userId != null) {
+			return Response.withSuccess(userService.changePassword(userId, pass, newpass));
+		} else {
+			return Response.withError("Please Login To For Changing Password");
+		}
+	}
 
-    @RequestMapping({"/delete-user"})
-    @ResponseBody
-    public Response deleteUser(@RequestParam int id) {
-        userService.delete(id);
-        return Response.withSuccess(true);
-    }
+	@RequestMapping({ "/delete-user" })
+	@ResponseBody
+	public Response deleteUser(@RequestParam int id) {
+		userService.delete(id);
+		return Response.withSuccess(true);
+	}
 
 }
